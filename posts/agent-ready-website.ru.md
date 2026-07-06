@@ -8,6 +8,7 @@ authors:
     title: "CEO / Founding Engineer, Relux Works"
     links:
       - "https://github.com/ivanopcode"
+      - "https://www.linkedin.com/in/ivanoparin/"
   - name: "Alexis Grigoryev"
     title: "CTO / Founding Engineer, Relux Works"
     links:
