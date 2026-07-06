@@ -8,7 +8,8 @@ markdown; the site pulls them at build time and derives publication metadata fro
 
 1. A post is a markdown file in `posts/`, named `<slug>.<lang>.md`
    (langs: `en`, `ru`, `hy`, `ka`). Frontmatter: `title`, `description`, `slug`,
-   `lang`, `author`, `authorTitle`. **No dates in frontmatter** — they come from git.
+   `lang`, `author`, `authorTitle`, `aiSystems` (list of AI generation systems that
+   co-created the content of that post, e.g. "Claude Fable 5"; required for honesty). **No dates in frontmatter** — they come from git.
 2. On push to `main`, a GitHub Action calls a Cloudflare Deploy Hook; the site
    rebuilds automatically.
 3. During the site build, `datePublished` is derived from the **first commit** that

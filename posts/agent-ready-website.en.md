@@ -5,6 +5,8 @@ slug: "agent-ready-website"
 lang: "en"
 author: "Ivan Oparin"
 authorTitle: "CEO / Founding Engineer, Relux Works"
+aiSystems:
+  - "Claude Fable 5"
 ---
 
 AI assistants are becoming the first visitor many products ever meet. When a founder

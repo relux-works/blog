@@ -5,6 +5,8 @@ slug: "agent-ready-website"
 lang: "ka"
 author: "Ivan Oparin"
 authorTitle: "CEO / Founding Engineer, Relux Works"
+aiSystems:
+  - "Claude Fable 5"
 ---
 
 AI ასისტენტები ხდებიან პირველი ვიზიტორი, რომელსაც პროდუქტი ხვდება. როცა დამფუძნებელი
