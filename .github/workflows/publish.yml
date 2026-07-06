@@ -1,0 +1,21 @@
+name: Publish to relux.works
+
+on:
+  push:
+    branches: [main]
+    paths: ['posts/**']
+
+jobs:
+  trigger-site-rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Cloudflare Deploy Hook
+        env:
+          DEPLOY_HOOK: ${{ secrets.RELUX_WORKS_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "RELUX_WORKS_DEPLOY_HOOK secret is not set" >&2
+            exit 1
+          fi
+          curl -fsS -X POST "$DEPLOY_HOOK"
+          echo "Deploy hook triggered."
