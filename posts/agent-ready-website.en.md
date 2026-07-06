@@ -1,6 +1,6 @@
 ---
 title: "How We Made Our Site Agent-Native, Honestly"
-description: "The story of relux.works going from an agent-readiness score of 29 to 79, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, and the checks we deliberately left red."
+description: "The story of relux.works going from an agent-readiness score of 29 to a perfect 100, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, and the checks we deliberately left red."
 slug: "agent-ready-website"
 lang: "en"
 authors:
@@ -28,7 +28,7 @@ asked ourselves a simple question: can an agent actually do business with us?
 
 Cloudflare's [agent-readiness scanner](https://isitagentready.com) gave a blunt answer:
 29 out of 100, "Bot-Aware". Crawlable, and useless to any agent that wanted to act.
-Two days later the same scanner shows 79 and the top tier, Level 5 "Agent-Native",
+Two days later the same scanner shows a perfect 100, Level 5 "Agent-Native",
 with a working agent sales channel behind the score. Here is what we did, in order,
 including the parts we refused to fake.
 
@@ -107,10 +107,15 @@ We also published DNS-AID records (_index._agents and _mcp._agents) pointing at 
 gateway. The standard is an early draft, and the records are real, resolve globally
 and cost a minute to add.
 
-## What is still red, and why that is fine
+## The last mile: 79 to 100
 
-- DNS-AID wants a validated DNSSEC chain. Our zone already signs responses; the trust
-  chain completes when the DS record lands at the registrar, which is queued.
+The final points were pure diligence. We completed the DNSSEC chain of trust (a DS
+record at the registrar, so the DNS-AID records now validate with AD=true), and we
+finished the agent_auth metadata so an agent can discover the complete anonymous
+registration method, claim URI included. Machines read the fine print.
+
+## What we leave red on purpose
+
 - Commerce protocols (x402, ACP, UCP). We do not sell checkout-style, and pretending
   otherwise would mislead shopping agents.
 - Anything else that would require endpoints we do not run.
