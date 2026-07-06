@@ -3,8 +3,19 @@ title: "How We Made Our Site Agent-Native, Honestly"
 description: "The story of relux.works going from an agent-readiness score of 29 to 79, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, and the checks we deliberately left red."
 slug: "agent-ready-website"
 lang: "en"
-author: "Ivan Oparin"
-authorTitle: "CEO / Founding Engineer, Relux Works"
+authors:
+  - name: "Ivan Oparin"
+    title: "CEO / Founding Engineer, Relux Works"
+    links:
+      - "https://github.com/ivanopcode"
+  - name: "Alexis Grigoryev"
+    title: "CTO / Founding Engineer, Relux Works"
+    links:
+      - "https://www.linkedin.com/in/alexis-grigoryev-22bab159/"
+  - name: "Timur Kackan"
+    title: "AI/ML Engineer, Relux Works"
+    links:
+      - "https://www.linkedin.com/in/timur-kachkan/"
 aiSystems:
   - "Claude Fable 5"
 ---

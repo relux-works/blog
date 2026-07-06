@@ -3,8 +3,19 @@ title: "Ինչպես մենք սայթը դարձրինք agent-native, ազնվ
 description: "relux.works-ի պատմությունը. agent-readiness 29 բալից մինչև 79 և Level 5. աշխատող MCP սերվեր, հայտերի API, OAuth ագենտների համար, հինգ ռեեստր և չեկեր, որոնք գիտակցաբար թողեցինք կարմիր."
 slug: "agent-ready-website"
 lang: "hy"
-author: "Ivan Oparin"
-authorTitle: "CEO / Founding Engineer, Relux Works"
+authors:
+  - name: "Ivan Oparin"
+    title: "CEO / Founding Engineer, Relux Works"
+    links:
+      - "https://github.com/ivanopcode"
+  - name: "Alexis Grigoryev"
+    title: "CTO / Founding Engineer, Relux Works"
+    links:
+      - "https://www.linkedin.com/in/alexis-grigoryev-22bab159/"
+  - name: "Timur Kackan"
+    title: "AI/ML Engineer, Relux Works"
+    links:
+      - "https://www.linkedin.com/in/timur-kachkan/"
 aiSystems:
   - "Claude Fable 5"
 ---
