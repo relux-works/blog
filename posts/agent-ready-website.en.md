@@ -1,6 +1,6 @@
 ---
-title: "How We Made Our Site Agent-Native, Honestly"
-description: "The story of relux.works going from an agent-readiness score of 29 to a perfect 100, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, the checks we deliberately left red, and an honest look at what a perfect score is actually worth."
+title: "How We Made Our Site Agent-Native, Without Cutting Corners"
+description: "The story of relux.works going from an agent-readiness score of 29 to a perfect 100, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, the checks we deliberately left red, and a sober look at what a perfect score is actually worth."
 slug: "agent-ready-website"
 lang: "en"
 authors:
@@ -32,7 +32,7 @@ Two days later the same scanner shows a perfect 100, Level 5 "Agent-Native",
 with a working agent sales channel behind the score. Here is what we did, in order,
 including the parts we refused to fake.
 
-## The rule that kept us honest
+## The line we drew first
 
 Every emerging agentic-web standard can be gamed with a static JSON file. You can
 publish OAuth discovery metadata for APIs that do not exist, or an MCP server card
@@ -92,7 +92,7 @@ no human involved on our side of the pipe.
 ## Step three: discovery
 
 An endpoint nobody can find might as well not exist, so we published in every channel
-where our presence is honest:
+where we have something real to show:
 
 | Channel | What lives there |
 |---|---|
