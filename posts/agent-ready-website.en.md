@@ -1,6 +1,6 @@
 ---
 title: "How We Made Our Site Agent-Native, Honestly"
-description: "The story of relux.works going from an agent-readiness score of 29 to a perfect 100, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, and the checks we deliberately left red."
+description: "The story of relux.works going from an agent-readiness score of 29 to a perfect 100, Level 5: a working MCP server, an inquiries API, OAuth for agents, five registries, the checks we deliberately left red, and an honest look at what a perfect score is actually worth."
 slug: "agent-ready-website"
 lang: "en"
 authors:
@@ -114,6 +114,36 @@ record at the registrar, so the DNS-AID records now validate with AD=true), and 
 finished the agent_auth metadata so an agent can discover the complete anonymous
 registration method, claim URI included. Machines read the fine print.
 
+## What a perfect score is actually worth
+
+Time for the uncomfortable part. This scanner is built by a company that sells the
+fixes: Markdown for Agents lives in a paid plan, Pay Per Crawl is their marketplace,
+and the Managed robots.txt toggle that silently blocked AI training crawlers on our
+own zone ships enabled by default. Cloudflare does not rank anything; its real power
+is deciding, on a fifth of the web, which crawlers get through the door and at what
+price. A readiness score is a very good funnel for that business.
+
+And the score itself moves nothing. No engine ranks by it. Assistant answers are
+assembled in two stages: first a classical index (Bing for ChatGPT, Brave for Claude)
+picks candidate pages, then the agent fetches and reads them. Everything we shipped
+lives on the second stage. It makes us cheap to read and possible to act on, and it
+does nothing for the first.
+
+We measured that on ourselves. Our homepage is in the index Claude searches; our
+service pages are not there yet, and for the phrase vibe code rescue that index
+already returns half a dozen competitors. Meanwhile the crawlers that matter most
+are already here: Anthropic's and OpenAI's own bots have been reading this site
+daily since we opened the door. The labs are building their own indexes, and being
+early there may end up mattering more than any score.
+
+So why do the checklist at all? Because of the rule from day one. Every pointer we
+published leads to something that answers: the MCP server takes real inquiries, the
+OAuth server issues real tokens, the gateway earns its keep as a sales channel no
+matter what any scanner thinks. Do the checks that leave you with working
+infrastructure, skip the ones that leave you with a JSON file, and spend the saved
+time where answers actually come from: the boring indexes, the communities, and
+pages worth citing.
+
 ## What we leave red on purpose
 
 - Commerce protocols (x402, ACP, UCP). We do not sell checkout-style, and pretending
@@ -135,6 +165,9 @@ receipts.
    negative SEO for the agentic web.
 5. Check your CDN's default bot policy. It may be quietly blocking the crawlers you
    want most.
+
+6. Scores measure readiness, not reach. Reach comes from indexes, communities,
+   and pages worth citing.
 
 We build exactly this for clients, from [fixed-price MVPs](/en/ai-mvp-development/)
 and [rescuing vibe-coded apps](/en/vibe-code-rescue/) to
