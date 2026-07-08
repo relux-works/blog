@@ -1,4 +1,4 @@
-# Relux Works — Blog Content
+# Relux Works: Blog Content
 
 Content source for [relux.works](https://relux.works) blog. Posts live here as plain
 markdown; the site pulls them at build time and derives publication metadata from
@@ -9,7 +9,7 @@ markdown; the site pulls them at build time and derives publication metadata fro
 1. A post is a markdown file in `posts/`, named `<slug>.<lang>.md`
    (langs: `en`, `ru`, `hy`, `ka`). Frontmatter: `title`, `description`, `slug`,
    `lang`, `authors` (array of {name, title, links[]}), `aiSystems` (list of AI generation systems that
-   co-created the content of that post, e.g. "Claude Fable 5"; required for honesty). **No dates in frontmatter** — they come from git.
+   co-created the content of that post, e.g. "Claude Fable 5"; required for honesty). **No dates in frontmatter**: they come from git.
 2. On push to `main`, a GitHub Action calls a Cloudflare Deploy Hook; the site
    rebuilds automatically.
 
@@ -18,7 +18,7 @@ markdown; the site pulls them at build time and derives publication metadata fro
 Add `draft: true` to a post's frontmatter to publish it **unlisted**: it still builds
 and is viewable at its normal URL (bookmark it to preview), but it is excluded from the
 blog index and the sitemap, marked `noindex, nofollow`, carries no Article schema, and
-shows a "Draft" banner. Push it like any post — it goes live at its URL within ~2 min,
+shows a "Draft" banner. Push it like any post; it goes live at its URL within ~2 min,
 hidden from the public. Remove the `draft` flag (or set it to `false`) to publish for real.
 3. During the site build, `datePublished` is derived from the **first commit** that
    touched the file, `dateModified` from the **last commit**. Each rendered post links
