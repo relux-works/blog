@@ -17,8 +17,8 @@ aiSystems:
 *The finished identity family across full color, dark background, one-color, and
 knockout use.*
 
-Generated pixels can set a direction. Production assets need explicit geometry,
-controlled decisions, and independent proof.
+Generated pixels can set a direction; carrying that direction into production takes
+explicit geometry, controlled decisions, and independent proof.
 
 **Four lessons carried the project:**
 
@@ -34,10 +34,10 @@ rebuilds the package from source.
 
 ## Choose the representation before the model
 
-Early in the project, metaphor, composition, and silhouette were open. The production
-requirements were already fixed: two elements, sharp corners, an open gap, flat color,
-one-color recognition, and a mark that stayed clear at small sizes. That split kept
-exploration open while giving every output a rejection test.
+Early in the project, metaphor, composition, and silhouette were still open questions,
+while the production requirements had already hardened: two elements, sharp corners,
+an open gap, flat color, one-color recognition, and a mark that stayed clear at small
+sizes. That split kept exploration free while giving every output a rejection test.
 
 There is no universally best AI workflow for logo design. The useful choice depends on
 what is still unknown.
@@ -55,13 +55,13 @@ what is still unknown.
 
 The first Relux concept did useful diagnostic work. A language model produced real SVG
 and encoded our four-step agent loop with literal accuracy. At logo scale, the result
-behaved like process machinery, with associations closer to sync or recycling than to
-a confident company mark.
+behaved like process machinery and read as sync or recycling iconography long before
+it read as a company mark.
 
 [![An early Relux concept generated directly as SVG, showing a four-arrow agent cycle around a red core](/blog/when-ai-should-write-svg/llm-svg-concept.png)](/blog/when-ai-should-write-svg/llm-svg-concept.png)
 
-*Direct SVG generation captured the system. It also revealed that the system was too
-much information for one mark.*
+*Direct SVG generation captured the system faithfully enough to reveal that the
+system itself was too much information for one mark.*
 
 That diagnosis changed the remaining question from construction to visual reduction.
 How much could disappear while preserving motion and intervention? GPT Image produced
@@ -97,16 +97,16 @@ geometry, weight, placement, color, and lockup questions into narrow, reviewable
 passes.
 
 Its value lay in separating fixed intent from testable hypotheses. Two shapes, their
-directions, sharp corners, flat colors, and the open gap were invariants. The `0.4T`
+directions, sharp corners, flat colors, and the open gap stood as invariants. The `0.4T`
 clearance, where `T` meant the perpendicular thickness of one red arm, the
-100-versus-95-percent arrow-weight comparison, and the initial lockup ratios were
-starting hypotheses. Each still had to survive native-size rendering.
+100-versus-95-percent arrow-weight comparison, and the initial lockup ratios entered
+the brief as hypotheses, each of which still had to survive native-size rendering.
 
-It also made uncertainty conditional instead of vague. The brief authorized a micro
-version only if the master failed at 16–24 pixels and required Codex to inspect the
-repository before choosing a font or color. It set a clear escalation boundary for
-typography: complete the symbol, but do not call the lockup final until the licensed
-font is identified. Preliminary similarity research was permitted, while formal
+It also translated the remaining uncertainty into conditions. The brief authorized a
+micro version only if the master failed between 16 and 24 pixels and required Codex
+to inspect the repository before choosing a font or color. It set a clear escalation
+boundary for typography: complete the symbol, but do not call the lockup final until
+the licensed font is identified. Preliminary similarity research was permitted, while formal
 trademark clearance remained outside the agent's authority.
 
 Codex received a decision protocol: construct the assets, render controlled candidates,
@@ -117,7 +117,8 @@ intent, consequential approvals, licensing, and legal clearance.
 
 ## Direct SVG generation asks for construction
 
-Image generation asks for appearance. Direct SVG generation asks for construction.
+Where image generation trades in appearance, direct SVG generation commits to
+construction.
 
 That distinction matters because the `.svg` suffix does not certify production
 quality. The
@@ -140,7 +141,7 @@ L48 62 L42 56 L25 73 Z
 ```
 
 Those coordinates expose the construction for review. We can verify the tip at `(88,
-50)`, reflect the red arms across the centerline, verify the arrow's symmetry about its
+50)`, reflect the red arms across the centerline, check the arrow's symmetry about its
 45-degree axis, and calculate the minimum gap. The resulting
 [production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
 is small enough to understand without an editor.
@@ -169,16 +170,15 @@ Proof: render at 16, 24, 32, and 64 pixels
 
 The constraints should describe the intended construction. A request for visual
 similarity alone leaves the relationships ambiguous. Coordinate correctness still
-needs visual judgment: valid XML and exact symmetry can still produce a lifeless mark.
+needs visual judgment: valid XML and exact symmetry can add up to a perfectly lifeless
+mark.
 
-## Tracing copies evidence, reconstruction preserves intent
+## From traced evidence to reconstructed intent
 
 Once an image model has produced a convincing direction, there are two common routes
-back to vector artwork.
-
-Tracing finds contours in the raster and turns them into paths. Reconstruction asks
-which geometric decisions could have produced the image, then draws those decisions
-directly.
+back to vector artwork: tracing, which finds contours in the raster and turns them
+into paths, and reconstruction, which asks what geometric decisions could have
+produced the image and then draws those decisions directly.
 
 The difference is easy to miss at first. Antialiasing, compression, gradients, and
 slight misalignment are all visible evidence, so a tracer has to respond to them. The
@@ -194,9 +194,9 @@ from approximately `0.22T` above to `0.36T` below. The raster also contained gra
 and color variation that did not belong to the identity.
 
 A trace begins from visible pixel contours. Thresholding and smoothing may discard or
-alter some defects, but they cannot infer which relationships were intended. A faithful
-trace risked preserving those differences; an aggressive one risked distorting them.
-Neither could know which ones to correct.
+alter some defects, but they cannot infer which relationships were intended. However
+carefully we tuned it, a trace would have either carried those differences forward or
+distorted them further, without ever knowing which ones deserved correction.
 
 Reconstruction was the decisive production step. We preserved the recognizable
 direction and replaced incidental pixels with explicit relationships: two elements,
@@ -206,21 +206,23 @@ picture became an identity system.
 
 [![Before-and-after comparison of the GPT Image raster reference and the coordinate-built Relux Works vector symbol and wordmark](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
 
-*The generated image supplied the gestalt. Reconstruction supplied the system.*
+*Reconstruction took the gestalt of the generated image and gave it the discipline
+of a system.*
 
-Tracing remains useful for flat source artwork whose contours are already the design,
-and for organic marks where a traced path can start a manual cleanup. It is a weak way
-to recover circles, shared radii, mirror axes, equal bar weights, or intentional
-negative space. Pixels do not contain those relationships.
+Tracing keeps its place for flat source artwork whose contours are already the design,
+and for organic marks where a traced path can start a manual cleanup. Circles, shared
+radii, mirror axes, equal bar weights, and intentional negative space sit beyond its
+reach, because pixels simply do not carry those relationships.
 
 ## We used Inkscape as a compiler
 
 We assigned Inkscape the part of the pipeline it could make deterministic: converting
-pinned live type into portable production outlines. It did not trace or redraw the
-symbol. Those paths remained governed by the coordinate source.
+pinned live type into portable production outlines. The symbol never entered that
+stage; its paths stayed governed by the coordinate source.
 
-The wordmark was different. We wanted an editable live-type master in Inter Bold 700
-and portable production lockups with outlined letters. The build bundled the official
+The wordmark called for its own treatment. We wanted an editable live-type master in
+Inter Bold 700 and portable production lockups with outlined letters. The build
+bundled the official
 [Inter 4.1](https://github.com/rsms/inter/releases/tag/v4.1) font files and pointed
 Fontconfig at that private font directory. Inkscape 1.4.2 then ran headlessly:
 
@@ -242,8 +244,8 @@ inkscape "source/$SRC" \
 The relevant [Inkscape command-line options](https://inkscape.org/doc/inkscape-man.html)
 turn the live text into paths and request a portable Plain SVG. We still did not ship
 that raw file. A cleanup script extracted the generated wordmark path and rebuilt a
-minimal SVG around it. Plain SVG improves interoperability; it does not promise minimal
-topology or remove every unnecessary decision.
+minimal SVG around it. Plain SVG improves interoperability without promising minimal
+topology or removing every unnecessary decision.
 
 We retained both sources:
 
@@ -257,9 +259,9 @@ differing pixels. This caught changes introduced during outlining, spacing, or c
 Bundling Inter and pinning Fontconfig controlled the font input separately.
 
 General screen exports went through
-[`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html).
-Inkscape remained responsible for typography. Keeping those jobs separate made the
-toolchain easier to reason about.
+[`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html),
+while Inkscape remained responsible for typography; keeping those jobs separate made
+the toolchain easier to reason about.
 
 The complete package rebuilt through one command:
 
@@ -279,8 +281,9 @@ We built two arrow candidates. One gave the black stem the same thickness as a r
 arm. The other reduced it to 95 percent. Every unrelated variable stayed fixed. Both
 looked plausible when enlarged.
 
-At 24 pixels, the thinner arrow lost presence without making the gap feel more open.
-The equal-weight version won. Its smaller footprint already provided the hierarchy.
+At 24 pixels, the thinner arrow lost presence without making the gap feel any more
+open. The equal-weight version won; the arrow's smaller footprint already provided
+the hierarchy.
 
 [![Equal-weight and 95 percent arrow candidates at native and enlarged sizes](/blog/when-ai-should-write-svg/arrow-weight-comparison.png)](/blog/when-ai-should-write-svg/arrow-weight-comparison.png)
 
@@ -300,8 +303,9 @@ not triggered.
 
 [![Responsive logo tests from 16 to 128 pixels with enlarged pixel inspection](/blog/when-ai-should-write-svg/responsive-size-test.png)](/blog/when-ai-should-write-svg/responsive-size-test.png)
 
-At 400 percent zoom, node placement dominates the conversation. At 24 pixels, only the
-silhouette, spacing, and color separation survive.
+Node placement dominates the conversation at 400 percent zoom, and almost none of
+that survives the trip down to 24 pixels, where the mark lives on silhouette,
+spacing, and color separation alone.
 
 ## Validate what the file does
 
@@ -338,8 +342,8 @@ The final audit followed a failure model. Parsing, inspecting resources, verifyi
 geometry, and rendering pixels answer different questions, so each needed its own
 check.
 
-One-color recognition was one of those behavior checks. The two forms remain separate
-without depending on red versus black.
+One-color recognition was one of those behavior checks: the two forms stay distinct
+even once red and black collapse into a single ink.
 
 ## The result shipped as an identity system
 
@@ -367,14 +371,14 @@ future changes.
 
 The process now fits into eight steps that travel well beyond this mark.
 
-1. **Use the right search space.** Explore appearance with an image model. Generate SVG
-   directly when the unknowns can be stated as geometry.
+1. **Use the right search space.** Explore appearance with an image model, and generate
+   SVG directly when the unknowns can be stated as geometry.
 2. **Freeze the intent.** Write down the elements, directions, hierarchy, axes, palette,
    forbidden motifs, and minimum-size target before refining pixels.
 3. **Compile the handoff.** Turn critique into invariants, controlled comparisons,
    deliverables, checks, and clear escalation boundaries before execution begins.
-4. **Choose tracing carefully.** Trace clean contours when contours are enough.
-   Reconstruct primitives and relationships when the design depends on them.
+4. **Choose tracing carefully.** Trace clean contours when contours are enough, and
+   reconstruct primitives and relationships when the design depends on them.
 5. **Keep editable and production type.** Preserve a live-type source, outline a pinned
    font in a controlled environment, and compare both renders.
 6. **Render the decision.** Build controlled candidates and inspect them at real sizes.
@@ -389,7 +393,7 @@ set its authority boundary, and require evidence before the next decision.
 That operating model underpins our [AI MVP development](/en/ai-mvp-development/),
 [vibe-code rescue](/en/vibe-code-rescue/), and
 [agentic enablement](/en/agentic-enablement/). Engineers define the constraints and
-verification boundaries. Agents move quickly inside them. Relux Works remains
+verification boundaries, agents move quickly inside them, and Relux Works remains
 accountable for what ships and how it is handed over.
 
 If you have a promising AI-generated direction that needs production discipline,
