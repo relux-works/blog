@@ -1,0 +1,316 @@
+---
+title: "When AI Should Write SVG: A Production Workflow for Logos"
+description: "How to choose between image generation, direct SVG construction, bitmap tracing, and vector-editor finishing, with a real logo pipeline from visual search to print QA."
+slug: "when-ai-should-write-svg"
+lang: "en"
+authors:
+  - name: "Timur Kackan"
+    title: "AI/ML Engineer, Relux Works"
+    links:
+      - "https://www.linkedin.com/in/timur-kachkan/"
+aiSystems:
+  - "OpenAI Codex"
+  - "OpenAI GPT Image"
+---
+
+A generated logo can look finished long before it becomes a usable asset.
+
+The awkward moment arrives after the visual direction has clicked. Everyone recognizes
+the mark. It works in a presentation. Then somebody asks for the SVG, the favicon, the
+one-color version, or a print-ready file. The source turns out to be a raster image with
+soft edges, accidental asymmetry, color noise, and lettering that cannot be trusted.
+
+Our own identity moved through three representations. The first concept was generated
+directly as SVG by a language model. GPT Image in ChatGPT then found a much simpler
+two-gesture direction as a raster image. Finally, Codex reconstructed that direction as
+explicit SVG geometry and built the production files around it.
+
+That round trip shifted our attention from ranking models to matching each
+representation with the uncertainty in front of us. Visual search, geometric
+construction, typography, and file validation turned out to be different jobs.
+
+## Choose the representation before the model
+
+There is no universally best AI workflow for logo design. The useful choice depends on
+what is still unknown.
+
+- **Use an image model** while exploring metaphor, gesture, composition, and broad
+  silhouette. It can move quickly through visual territory that would be tedious to
+  describe as coordinates.
+- **Ask a language model to write SVG** when the mark is flat, geometric, and honestly
+  expressible through axes, ratios, primitives, and a small palette.
+- **Use automatic tracing** when the source is already clean, hard-edged, high contrast,
+  and close to production artwork. Treat the trace as a scaffold when the geometry has
+  meaningful constraints.
+- **Use a vector editor** for organic curves, expressive lettering, Boolean construction,
+  and optical adjustments that are easier to see than to specify numerically.
+
+The first Relux concept shows why output format alone does not solve the design problem.
+The model produced real SVG and encoded our four-step agent loop with impressive
+literal accuracy. The result still behaved like a workflow diagram.
+
+[![An early Relux concept generated directly as SVG, showing a four-arrow agent cycle around a red core](/blog/when-ai-should-write-svg/llm-svg-concept.png)](/blog/when-ai-should-write-svg/llm-svg-concept.png)
+
+*Direct SVG generation captured the system. It also revealed that the system was too
+much information for one mark.*
+
+GPT Image was more useful at that stage because the remaining question concerned
+visual reduction: how much could we remove while keeping motion and intervention? Its
+answer was a large right-facing red chevron and a smaller northeast arrow. That
+silhouette became the direction. The generated pixels did not become the master.
+
+For this kind of exploration, a short acceptance contract is more useful than a long
+stylistic prompt:
+
+```text
+Subject:
+  one large right-facing chevron
+  one small northeast arrow
+Keep:
+  sharp corners, open gap, clear hierarchy
+Avoid:
+  loops, boxes, extra arrows, effects
+Discard:
+  all generated lettering
+Approve:
+  silhouette and direction only
+```
+
+Judge the result against that contract. Generated type should be replaced, and the
+raster should remain a reference even when the visual direction is approved.
+
+## Direct SVG generation asks for construction
+
+Image generation asks for appearance. Direct SVG generation asks for construction.
+
+That distinction matters because the `.svg` suffix does not certify production
+quality. The
+[SVG specification](https://www.w3.org/TR/SVG2/intro.html) allows vector shapes, text,
+and raster images in the same document. An `.svg` file can still contain an embedded
+bitmap. A production review should inspect the elements inside it.
+
+For restrained geometric artwork, the source can be much simpler than the preview. Our
+final symbol uses a normalized `100 × 100` viewBox and two filled paths. The red
+chevron has six anchors. The northeast arrow has seven.
+
+```text
+Red:
+M48 10 L88 50 L48 90
+L38 80 L68 50 L38 20 Z
+
+Ink:
+M15 63 L32 46 L26 40 L48 40
+L48 62 L42 56 L25 73 Z
+```
+
+Those coordinates are reviewable in a way that pixels are not. We can verify the tip
+at `(88, 50)`, reflect the red arms across the centerline, verify the arrow's symmetry
+about its 45-degree axis, and calculate the minimum gap. The resulting
+[production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
+is small enough to understand without an editor.
+
+A useful direct-SVG prompt behaves like a production contract:
+
+```text
+Canvas: viewBox="0 0 100 100"
+Geometry:
+  45-degree and 90-degree edges
+Invariants:
+  mirrored arms, centered tip, open gap
+Artwork:
+  filled paths only, minimal anchors
+Exclude:
+  image, text, stroke, gradient,
+  filter, mask
+Output:
+  SVG plus measured bounds and clearances
+Proof: render at 16, 24, 32, and 64 pixels
+```
+
+The constraints should describe the intended construction, not merely ask for something
+that looks similar. Coordinate correctness still needs visual judgment. A model can
+produce valid XML, exact symmetry, and a lifeless mark at the same time.
+
+## Tracing copies evidence, reconstruction preserves intent
+
+Once an image model has produced a convincing direction, there are two common routes
+back to vector artwork.
+
+Tracing finds contours in the raster and turns them into paths. Reconstruction asks
+which geometric decisions could have produced the image, then draws those decisions
+directly.
+
+The difference is easy to miss at first. Antialiasing, compression, gradients, and
+slight misalignment are all visible evidence, so a tracer has to respond to them. The
+official Inkscape guide for
+[Trace Bitmap](https://inkscape-manuals.readthedocs.io/en/latest/tracing-an-image.html)
+warns against expecting perfect fidelity. More fidelity would not have helped us
+anyway, because several visible details were defects.
+
+Let `T` be the perpendicular thickness of one red arm. In the GPT Image reference, the
+upper and lower red arms measured roughly 141 and 139 pixels. The red tip landed
+slightly below its best centerline. The black stem was about `0.79T`, while its nearest
+clearance changed from approximately `0.22T` above to `0.36T` below. The raster also
+contained gradients and color variation that did not belong to the identity.
+
+A trace begins from visible pixel contours. Thresholding and smoothing may discard or
+alter some defects, but they cannot infer which relationships were intended. A faithful
+trace risked preserving those differences; an aggressive one risked distorting them.
+Neither could know which ones to correct. We kept the recognizable decisions instead:
+two elements, two directions, square cuts, one flat red, one ink value, and an open
+internal gap. The final clearance is exactly `0.4T`.
+
+[![The GPT Image raster direction beside the manually reconstructed production vector](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
+
+*The generated image supplied the gestalt. Reconstruction supplied the system.*
+
+Tracing remains useful for flat source artwork whose contours are already the design,
+and for organic marks where a traced path can start a manual cleanup. It is a weak way
+to recover circles, shared radii, mirror axes, equal bar weights, or intentional
+negative space. Pixels do not contain those relationships.
+
+## We used Inkscape as a compiler
+
+Inkscape played a narrow and important role in our build. We did not use Trace Bitmap,
+and we did not draw the symbol in the GUI. The symbol paths came directly from the
+coordinate source.
+
+The wordmark was different. We wanted an editable live-type master in Inter Bold 700
+and portable production lockups with outlined letters. The build bundled the official
+[Inter 4.1](https://github.com/rsms/inter/releases/tag/v4.1) font files and pointed
+Fontconfig at that private font directory. Inkscape 1.4.2 then ran headlessly:
+
+```sh
+SRC=relux-lockup-horizontal-live-type.svg
+TARGET=horizontal-outlined-test.svg
+OUT=tests/renders
+CACHE=/tmp/relux-works-font-cache
+
+export FONTCONFIG_FILE=tools/fonts.conf
+export XDG_CACHE_HOME="$CACHE"
+
+inkscape "source/$SRC" \
+  --export-text-to-path \
+  --export-plain-svg \
+  --export-filename="$OUT/$TARGET"
+```
+
+The relevant [Inkscape command-line options](https://inkscape.org/doc/inkscape-man.html)
+turn the live text into paths and request a portable Plain SVG. We still did not ship
+that raw file. A cleanup script extracted the generated wordmark path and rebuilt a
+minimal SVG around it. Plain SVG improves interoperability; it does not promise minimal
+topology or remove every unnecessary decision.
+
+We retained both sources:
+
+- the live-type SVG for editing, with the font family, weight, spacing, and exact text;
+- the outlined SVG for production, with no font dependency at delivery time.
+
+Inkscape also rendered the live and outlined horizontal lockups at the same width.
+[Pillow's `ImageChops`](https://pillow.readthedocs.io/en/stable/reference/ImageChops.html)
+compared the two renders, and `difference(...).getbbox()` had to return `None`: zero
+differing pixels. This caught font substitution, spacing changes, and outline
+conversion errors with the same engine that created the paths.
+
+General screen exports went through
+[`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html).
+Inkscape remained responsible for typography. Keeping those jobs separate made the
+toolchain easier to reason about.
+
+The complete package rebuilt through one command:
+
+```sh
+python3 tools/build_all.py
+```
+
+It regenerated vector sources, outlined type, screen exports, proof sheets, and print
+files before running the checks.
+
+## Native-size rendering is part of drawing
+
+Mathematical equality settles some questions. Optical balance settles others.
+
+We built two controlled arrow candidates. One gave the black stem the same thickness
+as a red arm. The other reduced it to 95 percent. Every other coordinate stayed fixed.
+Both looked plausible when enlarged.
+
+At 24 pixels, the thinner arrow lost presence without making the gap feel more open.
+The equal-weight version won. Its smaller footprint already provided the hierarchy.
+
+[![Equal-weight and 95 percent arrow candidates at native and enlarged sizes](/blog/when-ai-should-write-svg/arrow-weight-comparison.png)](/blog/when-ai-should-write-svg/arrow-weight-comparison.png)
+
+*The useful answer appeared at its smallest intended size.*
+
+This is a repeatable way to resolve optical questions:
+
+1. Express one question as two controlled candidates.
+2. Keep every unrelated variable fixed.
+3. Render both at actual delivery sizes.
+4. Decide from the smallest meaningful view.
+5. Adjust placement and negative space before deforming the shapes.
+
+We then rendered the selected master at 16, 24, 32, 48, 64, and 128 pixels, plus a
+10 mm print proof. It remained distinct at 16 pixels, so a separate micro redraw would
+have added another source without improving recognition.
+
+[![Responsive logo tests from 16 to 128 pixels with enlarged pixel inspection](/blog/when-ai-should-write-svg/responsive-size-test.png)](/blog/when-ai-should-write-svg/responsive-size-test.png)
+
+At 400 percent zoom, node placement dominates the conversation. At 24 pixels, only the
+silhouette, spacing, and color separation survive.
+
+## Validate what the file does
+
+A file can parse successfully and still fail its only job.
+
+Our checks were organized in layers:
+
+- **Structure:** production SVGs contain paths and approved fills, with no embedded
+  images, live strokes, gradients, filters, masks, clipping debris, or live text.
+- **Geometry:** actual parsed paths satisfy the axes, reflections, thickness, tip,
+  clearance, bounds, and anchor limits.
+- **Raster output:** dimensions, transparency, outer corners, and every native favicon
+  frame are inspected.
+- **Visual behavior:** the mark is rendered at native sizes, on light and dark
+  backgrounds, and in positive and knockout one-color treatments.
+- **Print output:** PDF files contain DeviceCMYK fills; EPS files contain CMYK
+  `setcmykcolor` commands and a valid paint operator. Neither format contains fonts or
+  images, and both render visibly in an independent reader.
+- **Reproducibility:** one build command regenerates the exact manifest before proofs
+  and checks run.
+
+The print pipeline justified the last two layers. One early CMYK build passed values on
+the wrong numeric scale. Another EPS contained all the correct coordinates and no
+painting operator, so it opened as a perfectly blank file. We fixed the exporter to
+emit `eofill`, then used
+[Ghostscript](https://ghostscript.readthedocs.io/en/latest/Use.html) to render every EPS
+and confirm that visible pixels actually existed.
+
+The important part of the final audit was its failure model. Parsing, inspecting
+resources, verifying geometry, and rendering pixels answer different questions. No
+single check can stand in for the others.
+
+[![Full-color, dark-background, one-color, and knockout identity proofs](/blog/when-ai-should-write-svg/identity-family-proof.png)](/blog/when-ai-should-write-svg/identity-family-proof.png)
+
+*One-color recognition is a geometry test. The two forms remain separate without
+depending on red versus black.*
+
+## A reusable AI-assisted logo pipeline
+
+The process now fits into seven steps that travel well beyond this mark.
+
+1. **Use the right search space.** Explore appearance with an image model. Generate SVG
+   directly when the unknowns can be stated as geometry.
+2. **Freeze the intent.** Write down the elements, directions, hierarchy, axes, palette,
+   forbidden motifs, and minimum-size target before refining pixels.
+3. **Choose tracing carefully.** Trace clean contours when contours are enough.
+   Reconstruct primitives and relationships when the design depends on them.
+4. **Keep editable and production type.** Preserve a live-type source, outline a pinned
+   font in a controlled environment, and compare both renders.
+5. **Render the decision.** Build controlled candidates and inspect them at real sizes.
+6. **Use independent readers.** A second renderer can expose unsupported features,
+   missing paint operations, font substitution, and transparency mistakes.
+7. **Ship the method with the files.** Include source geometry, generation scripts,
+   proofs, color and spacing rules, and one validation command.
+
+The production file now remembers the decisions behind the mark instead of the
+accidents of its preview. That is the standard we would use for the next identity too.
