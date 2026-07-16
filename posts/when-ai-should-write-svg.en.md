@@ -1,6 +1,6 @@
 ---
 title: "From AI Concept to Production Identity: When AI Should Write SVG"
-description: "How Relux Works turned an AI-generated direction into a complete, reproducible identity system, with lessons on image generation, SVG construction, tracing, Inkscape, and production QA."
+description: "How Relux Works turned an AI-generated direction into a complete, reproducible identity system, with lessons on AI handoffs, SVG construction, tracing, Inkscape, and production QA."
 slug: "when-ai-should-write-svg"
 lang: "en"
 authors:
@@ -9,8 +9,9 @@ authors:
     links:
       - "https://www.linkedin.com/in/timur-kachkan/"
 aiSystems:
-  - "OpenAI Codex"
   - "OpenAI GPT Image"
+  - "OpenAI gpt-5.6-sol"
+  - "OpenAI Codex"
 ---
 
 A generated logo can look finished long before it becomes a usable asset.
@@ -30,11 +31,16 @@ concept directly as SVG. GPT Image in ChatGPT found the simpler two-gesture dire
 as a raster image. Codex then reconstructed that direction as explicit geometry and
 built the production system around it.
 
-The result is a complete identity family that remains distinct at 16 pixels and at
-10 mm in print. It includes editable and outlined lockups, full-color and one-color
-artwork, knockout and dark-background variants, favicons, avatars, screen exports,
-print files, and usage guidance. The entire package rebuilds from source with one
-command.
+Between the raster and the reconstruction, we used a separate `gpt-5.6-sol`
+conversation for a design-review pass. It assessed the PNG, expanded its
+recommendations into measurable steps, and compiled the execution prompt that Codex
+received.
+
+The result is a complete identity family whose symbol remains visually clear at 16
+pixels and in a 10 mm print proof. It includes editable and outlined lockups, full-color
+and one-color artwork, knockout and dark-background variants, favicons, avatars,
+screen exports, print files, and usage guidance. The entire package rebuilds from
+source with one command.
 
 The project gave us a reusable operating principle: keep uncertainty visible, give each
 tool a bounded job, and change representations as decisions harden.
@@ -98,6 +104,35 @@ raster should remain a reference even when the visual direction is approved.
 This separated exploration from approval. The image model could propose freely while
 the contract defined what evidence counted.
 
+## Compile critique into a decision protocol
+
+A separate `gpt-5.6-sol` conversation sat between the generated PNG and Codex. We asked
+it to assess the mark from a design-lead perspective, unfold its recommendations into
+actionable steps, and compile those steps into the production brief. Its focused image
+editing prompts organized the critique into separate geometry, weight, placement,
+color, and lockup passes, keeping each decision narrow and reviewable.
+
+Its value lay in separating fixed intent from testable hypotheses. Two shapes, their
+directions, sharp corners, flat colors, and the open gap were invariants. The `0.4T`
+clearance, where `T` meant the perpendicular thickness of one red arm, the
+100-versus-95-percent arrow-weight comparison, and the initial lockup ratios were
+starting hypotheses. Each still had to survive native-size rendering.
+
+It also made uncertainty conditional instead of vague. The brief authorized a micro
+version only if the master failed at 16–24 pixels and required Codex to inspect the
+repository before choosing a font or color. It set a clear escalation boundary for
+typography: complete the symbol, but do not call the lockup final until the licensed
+font is identified. Preliminary similarity research was permitted, while formal
+trademark clearance remained outside the agent's authority.
+
+Codex therefore received a decision protocol: construct the assets, render controlled
+candidates, inspect the evidence, revise visible failures, then deliver sources,
+exports, proofs, and a QA record. That structure was specific enough for autonomous
+execution and open enough for optical judgment. The pattern travels beyond identity
+work: one system explores, another turns critique into constraints and tests, and an
+execution agent produces both the artifact and the evidence. Humans retain
+responsibility for intent, consequential approvals, and legal clearance.
+
 ## Direct SVG generation asks for construction
 
 Image generation asks for appearance. Direct SVG generation asks for construction.
@@ -128,9 +163,9 @@ about its 45-degree axis, and calculate the minimum gap. The resulting
 [production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
 is small enough to understand without an editor.
 
-By the time we returned to SVG, the visual uncertainty was resolved. The remaining job
-was to encode the agreed relationships precisely enough to inspect, reproduce, and
-test.
+By the time we returned to SVG, the conceptual direction and silhouette were resolved.
+The remaining job was to encode the agreed relationships precisely enough to inspect,
+reproduce, and test.
 
 A useful direct-SVG prompt behaves like a production contract:
 
@@ -170,11 +205,11 @@ official Inkscape guide for
 warns against expecting perfect fidelity. More fidelity would not have helped us
 anyway, because several visible details were defects.
 
-Let `T` be the perpendicular thickness of one red arm. In the GPT Image reference, the
-upper and lower red arms measured roughly 141 and 139 pixels. The red tip landed
-slightly below its best centerline. The black stem was about `0.79T`, while its nearest
-clearance changed from approximately `0.22T` above to `0.36T` below. The raster also
-contained gradients and color variation that did not belong to the identity.
+Using the same definition of `T`, the upper and lower red arms in the GPT Image
+reference measured roughly 141 and 139 pixels. The red tip landed slightly below its
+best centerline. The black stem was about `0.79T`, while its nearest clearance changed
+from approximately `0.22T` above to `0.36T` below. The raster also contained gradients
+and color variation that did not belong to the identity.
 
 A trace begins from visible pixel contours. Thresholding and smoothing may discard or
 alter some defects, but they cannot infer which relationships were intended. A faithful
@@ -187,7 +222,7 @@ two directions, square cuts, mirrored red arms, one flat red, one ink value, and
 open internal gap. The final clearance is exactly `0.4T`. At that point, an approved
 picture became an identity system.
 
-[![The GPT Image raster direction beside the manually reconstructed production vector](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
+[![The GPT Image raster direction beside the explicitly reconstructed production vector](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
 
 *The generated image supplied the gestalt. Reconstruction supplied the system.*
 
@@ -236,8 +271,8 @@ We retained both sources:
 Inkscape also rendered the live and outlined horizontal lockups at the same width.
 [Pillow's `ImageChops`](https://pillow.readthedocs.io/en/stable/reference/ImageChops.html)
 compared the two renders, and `difference(...).getbbox()` had to return `None`: zero
-differing pixels. This caught font substitution, spacing changes, and outline
-conversion errors with the same engine that created the paths.
+differing pixels. This caught changes introduced during outlining, spacing, or cleanup.
+Bundling Inter and pinning Fontconfig controlled the font input separately.
 
 General screen exports went through
 [`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html).
@@ -259,7 +294,7 @@ Optical balance still needs judgment. We made that judgment reviewable by conver
 one concern, the black arrow's apparent weight, into a controlled experiment.
 
 We built two arrow candidates. One gave the black stem the same thickness as a red
-arm. The other reduced it to 95 percent. Every other coordinate stayed fixed. Both
+arm. The other reduced it to 95 percent. Every unrelated variable stayed fixed. Both
 looked plausible when enlarged.
 
 At 24 pixels, the thinner arrow lost presence without making the gap feel more open.
@@ -278,8 +313,8 @@ This is a repeatable way to resolve optical questions:
 5. Adjust placement and negative space before deforming the shapes.
 
 We then rendered the selected master at 16, 24, 32, 48, 64, and 128 pixels, plus a
-10 mm print proof. It remained distinct at 16 pixels, so a separate micro redraw would
-have added another source without improving recognition.
+10 mm print proof. The master passed at 16 pixels, so the conditional micro branch was
+not triggered.
 
 [![Responsive logo tests from 16 to 128 pixels with enlarged pixel inspection](/blog/when-ai-should-write-svg/responsive-size-test.png)](/blog/when-ai-should-write-svg/responsive-size-test.png)
 
@@ -351,20 +386,22 @@ exports.
 
 ## A reusable AI-assisted logo pipeline
 
-The process now fits into seven steps that travel well beyond this mark.
+The process now fits into eight steps that travel well beyond this mark.
 
 1. **Use the right search space.** Explore appearance with an image model. Generate SVG
    directly when the unknowns can be stated as geometry.
 2. **Freeze the intent.** Write down the elements, directions, hierarchy, axes, palette,
    forbidden motifs, and minimum-size target before refining pixels.
-3. **Choose tracing carefully.** Trace clean contours when contours are enough.
+3. **Compile the handoff.** Turn critique into invariants, controlled comparisons,
+   deliverables, checks, and clear escalation boundaries before execution begins.
+4. **Choose tracing carefully.** Trace clean contours when contours are enough.
    Reconstruct primitives and relationships when the design depends on them.
-4. **Keep editable and production type.** Preserve a live-type source, outline a pinned
+5. **Keep editable and production type.** Preserve a live-type source, outline a pinned
    font in a controlled environment, and compare both renders.
-5. **Render the decision.** Build controlled candidates and inspect them at real sizes.
-6. **Use independent readers.** A second renderer can expose unsupported features,
+6. **Render the decision.** Build controlled candidates and inspect them at real sizes.
+7. **Use independent readers.** A second renderer can expose unsupported features,
    missing paint operations, font substitution, and transparency mistakes.
-7. **Ship the method with the files.** Include source geometry, generation scripts,
+8. **Ship the method with the files.** Include source geometry, generation scripts,
    proofs, color and spacing rules, and one validation command.
 
 The project succeeded because we knew which kind of uncertainty each tool could
