@@ -17,31 +17,20 @@ aiSystems:
 *The finished identity family across full color, dark background, one-color, and
 knockout use.*
 
-A generated logo can look finished long before it becomes a usable asset. The Relux
-Works mark made that gap visible.
+Generated pixels can set a direction. Production assets need explicit geometry,
+controlled decisions, and independent proof.
 
 **Four lessons carried the project:**
 
-- Approve generated pixels as a direction, then rebuild production artwork from
-  explicit geometry.
-- Translate visual critique into constraints, controlled comparisons, and a definition
-  of done before an agent executes.
-- Preserve geometric intent through reconstruction when raster artifacts would mislead
-  a tracer.
-- Test at native screen sizes and in print, where small errors become real failures.
+- Choose the representation according to what remains uncertain.
+- Reconstruct intended relationships when raster artifacts would mislead a tracer.
+- Turn visual critique into constraints, comparisons, authority limits, and evidence.
+- Test optical decisions at native delivery sizes and validate outputs independently.
 
-Those principles produced a complete identity family: editable and outlined lockups;
-full-color, one-color, knockout, and dark-background variants; favicons, avatars,
-screen exports, print files, and usage guidance. The symbol stays clear at 16 pixels
-and in a 10 mm print proof, and the package rebuilds from source with one command.
-
-The deeper point is about uncertainty. Early on, metaphor and composition were open.
-Later, the questions narrowed to geometry, typography, spacing, portability, and
-output. Different questions called for different representations and different
-evidence.
-
-The first decision was therefore about representation: which format made the remaining
-uncertainty easiest to inspect?
+Relux Works delivered editable and outlined lockups; full-color, one-color, knockout,
+and dark-background variants; favicons, avatars, screen exports, print files, and usage
+guidance. The symbol stays clear at 16 pixels and in a 10 mm print proof. One command
+rebuilds the package from source.
 
 ## Choose the representation before the model
 
@@ -64,8 +53,8 @@ what is still unknown.
 - **Use a vector editor** for organic curves, expressive lettering, Boolean construction,
   and optical adjustments that are easier to see than to specify numerically.
 
-The first Relux concept did useful diagnostic work. The model produced real SVG and
-encoded our four-step agent loop with impressive literal accuracy. At logo scale it
+The first Relux concept did useful diagnostic work. A language model produced real SVG
+and encoded our four-step agent loop with literal accuracy. At logo scale, the result
 behaved like process machinery, with associations closer to sync or recycling than to
 a confident company mark.
 
@@ -74,10 +63,10 @@ a confident company mark.
 *Direct SVG generation captured the system. It also revealed that the system was too
 much information for one mark.*
 
-That diagnosis gave us a clear next step: change representation and focus on visual
-reduction. How much could we remove while keeping motion and intervention? GPT Image
-answered with a large right-facing red chevron and a smaller northeast arrow. That
-silhouette became the direction. The generated pixels remained a reference.
+That diagnosis changed the remaining question from construction to visual reduction.
+How much could disappear while preserving motion and intervention? GPT Image produced
+a large right-facing red chevron and a smaller northeast arrow. We approved the
+silhouette as a direction and kept the generated pixels as a reference.
 
 For this kind of exploration, a short acceptance contract is more useful than a long
 stylistic prompt:
@@ -96,19 +85,16 @@ Approve:
   silhouette and direction only
 ```
 
-Judge the result against that contract. Generated type should be replaced, and the
-raster should remain a reference even when the visual direction is approved.
-
-This separated exploration from approval. The image model could propose freely while
-the contract defined what evidence counted.
+Judge the result against that contract. Replace generated type, and keep the raster as
+a reference even after approving the visual direction. The contract separates broad
+exploration from consequential approval.
 
 ## Compile critique into a decision protocol
 
-A separate `gpt-5.6-sol` conversation sat between the generated PNG and Codex. We asked
-it to assess the mark from a design-lead perspective, unfold its recommendations into
-actionable steps, and compile those steps into the production brief. Its focused image
-editing prompts organized the critique into separate geometry, weight, placement,
-color, and lockup passes, keeping each decision narrow and reviewable.
+A separate `gpt-5.6-sol` conversation assessed the generated PNG before Codex began
+production work. It translated design criticism into an execution brief, organizing
+geometry, weight, placement, color, and lockup questions into narrow, reviewable
+passes.
 
 Its value lay in separating fixed intent from testable hypotheses. Two shapes, their
 directions, sharp corners, flat colors, and the open gap were invariants. The `0.4T`
@@ -123,13 +109,11 @@ typography: complete the symbol, but do not call the lockup final until the lice
 font is identified. Preliminary similarity research was permitted, while formal
 trademark clearance remained outside the agent's authority.
 
-Codex therefore received a decision protocol: construct the assets, render controlled
-candidates, inspect the evidence, revise visible failures, then deliver sources,
-exports, proofs, and a QA record. That structure was specific enough for autonomous
-execution and open enough for optical judgment. The pattern travels beyond identity
-work: one system explores, another turns critique into constraints and tests, and an
-execution agent produces both the artifact and the evidence. Humans retain
-responsibility for intent, consequential approvals, and legal clearance.
+Codex received a decision protocol: construct the assets, render controlled candidates,
+inspect the evidence, revise visible failures, then deliver sources, exports, proofs,
+and a QA record. This critic-to-executor handoff works when it names the invariants,
+hypotheses, authority limits, and required evidence. Humans retain responsibility for
+intent, consequential approvals, licensing, and legal clearance.
 
 ## Direct SVG generation asks for construction
 
@@ -155,9 +139,9 @@ M15 63 L32 46 L26 40 L48 40
 L48 62 L42 56 L25 73 Z
 ```
 
-Those coordinates are reviewable in a way that pixels are not. We can verify the tip
-at `(88, 50)`, reflect the red arms across the centerline, verify the arrow's symmetry
-about its 45-degree axis, and calculate the minimum gap. The resulting
+Those coordinates expose the construction for review. We can verify the tip at `(88,
+50)`, reflect the red arms across the centerline, verify the arrow's symmetry about its
+45-degree axis, and calculate the minimum gap. The resulting
 [production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
 is small enough to understand without an editor.
 
@@ -183,9 +167,9 @@ Output:
 Proof: render at 16, 24, 32, and 64 pixels
 ```
 
-The constraints should describe the intended construction, not merely ask for something
-that looks similar. Coordinate correctness still needs visual judgment. A model can
-produce valid XML, exact symmetry, and a lifeless mark at the same time.
+The constraints should describe the intended construction. A request for visual
+similarity alone leaves the relationships ambiguous. Coordinate correctness still
+needs visual judgment: valid XML and exact symmetry can still produce a lifeless mark.
 
 ## Tracing copies evidence, reconstruction preserves intent
 
@@ -350,9 +334,9 @@ Both faults were caught inside the build before an asset could be approved or sh
 The pipeline made errors cheap to find, visible to reviewers, and straightforward to
 correct.
 
-The important part of the final audit was its failure model. Parsing, inspecting
-resources, verifying geometry, and rendering pixels answer different questions. No
-single check can stand in for the others.
+The final audit followed a failure model. Parsing, inspecting resources, verifying
+geometry, and rendering pixels answer different questions, so each needed its own
+check.
 
 One-color recognition was one of those behavior checks. The two forms remain separate
 without depending on red versus black.
@@ -376,9 +360,8 @@ and switches to approved one-color artwork in forced-colors mode. The public
 [brand reference](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/references/brand-identity.md)
 keeps those rules inspectable for product teams and future agents.
 
-The delivery gave the team assets it could use immediately and a controlled source for
-future changes. Those changes now begin from an authoritative source with reproducible
-exports.
+The delivery gave the team usable assets and an authoritative source for reproducible
+future changes.
 
 ## A reusable AI-assisted logo pipeline
 
@@ -400,9 +383,8 @@ The process now fits into eight steps that travel well beyond this mark.
 8. **Ship the method with the files.** Include source geometry, generation scripts,
    proofs, color and spacing rules, and one validation command.
 
-The project succeeded because we knew which kind of uncertainty each tool could
-resolve, stopped each tool at its boundary, and converted the accepted direction into
-a system ready for real delivery.
+The transferable method is simple: match each tool to the uncertainty it can resolve,
+set its authority boundary, and require evidence before the next decision.
 
 That operating model underpins our [AI MVP development](/en/ai-mvp-development/),
 [vibe-code rescue](/en/vibe-code-rescue/), and
