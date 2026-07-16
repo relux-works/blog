@@ -85,9 +85,8 @@ Approve:
   silhouette and direction only
 ```
 
-Judge the result against that contract. Replace generated type, and keep the raster as
-a reference even after approving the visual direction. The contract separates broad
-exploration from consequential approval.
+Replace generated type, and keep the raster as a reference even after approving the
+visual direction.
 
 ## Compile critique into a decision protocol
 
@@ -106,14 +105,13 @@ It also translated the remaining uncertainty into conditions. The brief authoriz
 micro version only if the master failed between 16 and 24 pixels and required Codex
 to inspect the repository before choosing a font or color. It set a clear escalation
 boundary for typography: complete the symbol, but do not call the lockup final until
-the licensed font is identified. Preliminary similarity research was permitted, while formal
-trademark clearance remained outside the agent's authority.
+the licensed font is identified. Preliminary similarity research was permitted, while
+formal trademark clearance remained outside the agent's authority.
 
 Codex received a decision protocol: construct the assets, render controlled candidates,
 inspect the evidence, revise visible failures, then deliver sources, exports, proofs,
-and a QA record. This critic-to-executor handoff works when it names the invariants,
-hypotheses, authority limits, and required evidence. Humans retain responsibility for
-intent, consequential approvals, licensing, and legal clearance.
+and a QA record. Humans retain responsibility for intent, consequential approvals,
+licensing, and legal clearance.
 
 ## Direct SVG generation asks for construction
 
@@ -121,10 +119,9 @@ Where image generation trades in appearance, direct SVG generation commits to
 construction.
 
 That distinction matters because the `.svg` suffix does not certify production
-quality. The
-[SVG specification](https://www.w3.org/TR/SVG2/intro.html) allows vector shapes, text,
-and raster images in the same document. An `.svg` file can still contain an embedded
-bitmap. A production review should inspect the elements inside it.
+quality: the [SVG specification](https://www.w3.org/TR/SVG2/intro.html) allows an
+`.svg` file to carry an embedded bitmap, so a production review should inspect the
+elements inside it.
 
 For restrained geometric artwork, the source can be much simpler than the preview. Our
 final symbol uses a normalized `100 × 100` viewBox and two filled paths. The red
@@ -145,10 +142,6 @@ Those coordinates expose the construction for review. We can verify the tip at `
 45-degree axis, and calculate the minimum gap. The resulting
 [production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
 is small enough to understand without an editor.
-
-By the time we returned to SVG, the conceptual direction and silhouette were resolved.
-The remaining job was to encode the agreed relationships precisely enough to inspect,
-reproduce, and test.
 
 A useful direct-SVG prompt behaves like a production contract:
 
@@ -193,10 +186,10 @@ best centerline. The black stem was about `0.79T`, while its nearest clearance c
 from approximately `0.22T` above to `0.36T` below. The raster also contained gradients
 and color variation that did not belong to the identity.
 
-A trace begins from visible pixel contours. Thresholding and smoothing may discard or
-alter some defects, but they cannot infer which relationships were intended. However
-carefully we tuned it, a trace would have either carried those differences forward or
-distorted them further, without ever knowing which ones deserved correction.
+Thresholding and smoothing may discard or alter some defects, but a trace cannot infer
+which relationships were intended. However carefully we tuned it, it would have either
+carried those differences forward or distorted them further, without ever knowing
+which ones deserved correction.
 
 Reconstruction was the decisive production step. We preserved the recognizable
 direction and replaced incidental pixels with explicit relationships: two elements,
@@ -243,9 +236,8 @@ inkscape "source/$SRC" \
 
 The relevant [Inkscape command-line options](https://inkscape.org/doc/inkscape-man.html)
 turn the live text into paths and request a portable Plain SVG. We still did not ship
-that raw file. A cleanup script extracted the generated wordmark path and rebuilt a
-minimal SVG around it. Plain SVG improves interoperability without promising minimal
-topology or removing every unnecessary decision.
+that raw file; a cleanup script extracted the wordmark path and rebuilt a minimal SVG
+around it.
 
 We retained both sources:
 
@@ -256,12 +248,10 @@ Inkscape also rendered the live and outlined horizontal lockups at the same widt
 [Pillow's `ImageChops`](https://pillow.readthedocs.io/en/stable/reference/ImageChops.html)
 compared the two renders, and `difference(...).getbbox()` had to return `None`: zero
 differing pixels. This caught changes introduced during outlining, spacing, or cleanup.
-Bundling Inter and pinning Fontconfig controlled the font input separately.
 
 General screen exports went through
-[`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html),
-while Inkscape remained responsible for typography; keeping those jobs separate made
-the toolchain easier to reason about.
+[`rsvg-convert`](https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/product.html);
+Inkscape stayed responsible for typography alone.
 
 The complete package rebuilt through one command:
 
@@ -324,48 +314,24 @@ Our checks were organized in layers:
 - **Print output:** PDF files contain DeviceCMYK fills; EPS files contain CMYK
   `setcmykcolor` commands and a valid paint operator. Neither format contains fonts or
   images, and both render visibly in an independent reader.
-- **Reproducibility:** one build command regenerates the exact manifest before proofs
-  and checks run.
 
-The print pipeline justified the last two layers. One early CMYK build passed values on
+The print layer earned its place the hard way. One early CMYK build passed values on
 the wrong numeric scale. Another EPS contained all the correct coordinates and no
 painting operator, so it opened as a perfectly blank file. We fixed the exporter to
 emit `eofill`, then used
 [Ghostscript](https://ghostscript.readthedocs.io/en/latest/Use.html) to render every EPS
 and confirm that visible pixels actually existed.
 
-Both faults were caught inside the build before an asset could be approved or shipped.
-The pipeline made errors cheap to find, visible to reviewers, and straightforward to
-correct.
-
-The final audit followed a failure model. Parsing, inspecting resources, verifying
-geometry, and rendering pixels answer different questions, so each needed its own
-check.
-
-One-color recognition was one of those behavior checks: the two forms stay distinct
-even once red and black collapse into a single ink.
+Both faults were caught inside the build, before anything could be approved or
+shipped.
 
 ## The result shipped as an identity system
-
-The raster direction became a governed family of production assets:
-
-- a two-path master symbol, an editable live-type horizontal source, and outlined
-  horizontal and stacked lockups;
-- full-color, one-color, knockout, light-background, and dark-background artwork;
-- transparent PNGs, native ICO frames, a theme-aware favicon, touch icon, avatar, and
-  social image;
-- DeviceCMYK PDF and EPS files, proof sheets, and concise usage guidance;
-- a reproducible build that regenerates sources, exports, proofs, and checks through
-  one command.
 
 The website now uses the approved artwork in its header, footer, favicon bundle,
 social metadata, and localized pages. The mark remains left-to-right inside RTL layouts
 and switches to approved one-color artwork in forced-colors mode. The public
 [brand reference](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/references/brand-identity.md)
 keeps those rules inspectable for product teams and future agents.
-
-The delivery gave the team usable assets and an authoritative source for reproducible
-future changes.
 
 ## A reusable AI-assisted logo pipeline
 
@@ -386,9 +352,6 @@ The process now fits into eight steps that travel well beyond this mark.
    missing paint operations, font substitution, and transparency mistakes.
 8. **Ship the method with the files.** Include source geometry, generation scripts,
    proofs, color and spacing rules, and one validation command.
-
-The transferable method is simple: match each tool to the uncertainty it can resolve,
-set its authority boundary, and require evidence before the next decision.
 
 That operating model underpins our [AI MVP development](/en/ai-mvp-development/),
 [vibe-code rescue](/en/vibe-code-rescue/), and
