@@ -14,36 +14,36 @@ aiSystems:
   - "OpenAI Codex"
 ---
 
-A generated logo can look finished long before it becomes a usable asset.
+[![Before-and-after comparison of the GPT Image raster reference and the coordinate-built Relux Works vector symbol and wordmark](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
 
-We needed an identity that could express forward delivery, technical intervention, and
-upward improvement without collapsing into a workflow diagram or a generic
-external-link mark. The visual brief was concise. The path to production was still
-open.
+*The raster at left was good enough to choose a direction. The reconstructed vector at
+right was engineered to ship.*
 
-The uncertainty changed shape as the work progressed. At first, we did not know which
-visual metaphor was right. Later, we knew the silhouette but not its exact geometry.
-Then the remaining risks moved into typography, small-size behavior, file portability,
-and print output. Each stage needed a different tool and a different kind of evidence.
+A generated logo can look finished long before it becomes a usable asset. The Relux
+Works mark made that gap visible.
 
-Our identity moved through three representations. A language model generated the first
-concept directly as SVG. GPT Image in ChatGPT found the simpler two-gesture direction
-as a raster image. Codex then reconstructed that direction as explicit geometry and
-built the production system around it.
+**Four lessons carried the project:**
 
-Between the raster and the reconstruction, we used a separate `gpt-5.6-sol`
-conversation for a design-review pass. It assessed the PNG, expanded its
-recommendations into measurable steps, and compiled the execution prompt that Codex
-received.
+- Approve generated pixels as a direction, then rebuild production artwork from
+  explicit geometry.
+- Translate visual critique into constraints, controlled comparisons, and a definition
+  of done before an agent executes.
+- Preserve geometric intent through reconstruction when raster artifacts would mislead
+  a tracer.
+- Test at native screen sizes and in print, where small errors become real failures.
 
-The result is a complete identity family whose symbol remains visually clear at 16
-pixels and in a 10 mm print proof. It includes editable and outlined lockups, full-color
-and one-color artwork, knockout and dark-background variants, favicons, avatars,
-screen exports, print files, and usage guidance. The entire package rebuilds from
-source with one command.
+Those principles produced a complete identity family: editable and outlined lockups;
+full-color, one-color, knockout, and dark-background variants; favicons, avatars,
+screen exports, print files, and usage guidance. The symbol stays clear at 16 pixels
+and in a 10 mm print proof, and the package rebuilds from source with one command.
 
-The project gave us a reusable operating principle: keep uncertainty visible, give each
-tool a bounded job, and change representations as decisions harden.
+The deeper point is about uncertainty. Early on, metaphor and composition were open.
+Later, the questions narrowed to geometry, typography, spacing, portability, and
+output. Different questions called for different representations and different
+evidence.
+
+The first decision was therefore about representation: which format made the remaining
+uncertainty easiest to inspect?
 
 ## Choose the representation before the model
 
@@ -220,11 +220,8 @@ Reconstruction was the decisive production step. We preserved the recognizable
 direction and replaced incidental pixels with explicit relationships: two elements,
 two directions, square cuts, mirrored red arms, one flat red, one ink value, and an
 open internal gap. The final clearance is exactly `0.4T`. At that point, an approved
-picture became an identity system.
-
-[![The GPT Image raster direction beside the explicitly reconstructed production vector](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
-
-*The generated image supplied the gestalt. Reconstruction supplied the system.*
+picture became an identity system. The opening comparison shows what changed: the
+generated image supplied the gestalt; reconstruction supplied the system.
 
 Tracing remains useful for flat source artwork whose contours are already the design,
 and for organic marks where a traced path can start a manual cleanup. It is a weak way
