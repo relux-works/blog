@@ -14,10 +14,10 @@ aiSystems:
   - "OpenAI Codex"
 ---
 
-[![Before-and-after comparison of the GPT Image raster reference and the coordinate-built Relux Works vector symbol and wordmark](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
+[![Full-color, dark-background, one-color, and knockout Relux Works identity family](/blog/when-ai-should-write-svg/identity-family-proof.png)](/blog/when-ai-should-write-svg/identity-family-proof.png)
 
-*The raster at left was good enough to choose a direction. The reconstructed vector at
-right was engineered to ship.*
+*The finished identity family across full color, dark background, one-color, and
+knockout use.*
 
 A generated logo can look finished long before it becomes a usable asset. The Relux
 Works mark made that gap visible.
@@ -220,8 +220,11 @@ Reconstruction was the decisive production step. We preserved the recognizable
 direction and replaced incidental pixels with explicit relationships: two elements,
 two directions, square cuts, mirrored red arms, one flat red, one ink value, and an
 open internal gap. The final clearance is exactly `0.4T`. At that point, an approved
-picture became an identity system. The opening comparison shows what changed: the
-generated image supplied the gestalt; reconstruction supplied the system.
+picture became an identity system.
+
+[![Before-and-after comparison of the GPT Image raster reference and the coordinate-built Relux Works vector symbol and wordmark](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
+
+*The generated image supplied the gestalt. Reconstruction supplied the system.*
 
 Tracing remains useful for flat source artwork whose contours are already the design,
 and for organic marks where a traced path can start a manual cleanup. It is a weak way
@@ -353,10 +356,8 @@ The important part of the final audit was its failure model. Parsing, inspecting
 resources, verifying geometry, and rendering pixels answer different questions. No
 single check can stand in for the others.
 
-[![Full-color, dark-background, one-color, and knockout identity proofs](/blog/when-ai-should-write-svg/identity-family-proof.png)](/blog/when-ai-should-write-svg/identity-family-proof.png)
-
-*One-color recognition is a geometry test. The two forms remain separate without
-depending on red versus black.*
+One-color recognition was one of those behavior checks. The two forms remain separate
+without depending on red versus black.
 
 ## The result shipped as an identity system
 
