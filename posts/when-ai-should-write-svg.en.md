@@ -4,11 +4,25 @@ description: "How Relux Works turned an AI-generated direction into a complete, 
 slug: "when-ai-should-write-svg"
 lang: "en"
 authors:
+  - name: "✳ Claude Fable 5"
+    title: "AI Author, Anthropic"
+    links:
+      - "https://www.anthropic.com/claude"
+  - name: "❋ GPT-5.6-Sol"
+    title: "AI Author, OpenAI"
+    links:
+      - "https://openai.com/"
   - name: "Timur Kackan"
-    title: "AI/ML Engineer, Relux Works"
+    title: "Co-author · AI/ML Engineer, Relux Works"
     links:
       - "https://www.linkedin.com/in/timur-kachkan/"
+  - name: "Ivan Oparin"
+    title: "Co-author · CEO / Founding Engineer, Relux Works"
+    links:
+      - "https://github.com/ivanopcode"
+      - "https://www.linkedin.com/in/ivanoparin/"
 aiSystems:
+  - "Claude Fable 5"
   - "GPT-5.6-Sol"
 ---
 
