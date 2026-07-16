@@ -9,9 +9,7 @@ authors:
     links:
       - "https://www.linkedin.com/in/timur-kachkan/"
 aiSystems:
-  - "OpenAI GPT Image"
-  - "OpenAI gpt-5.6-sol"
-  - "OpenAI Codex"
+  - "GPT-5.6-Sol"
 ---
 
 [![Full-color, dark-background, one-color, and knockout Relux Works identity family](/blog/when-ai-should-write-svg/identity-family-proof.png)](/blog/when-ai-should-write-svg/identity-family-proof.png)
