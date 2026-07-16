@@ -1,6 +1,6 @@
 ---
-title: "When AI Should Write SVG: A Production Workflow for Logos"
-description: "How to choose between image generation, direct SVG construction, bitmap tracing, and vector-editor finishing, with a real logo pipeline from visual search to print QA."
+title: "From AI Concept to Production Identity: When AI Should Write SVG"
+description: "How Relux Works turned an AI-generated direction into a complete, reproducible identity system, with lessons on image generation, SVG construction, tracing, Inkscape, and production QA."
 slug: "when-ai-should-write-svg"
 lang: "en"
 authors:
@@ -15,21 +15,36 @@ aiSystems:
 
 A generated logo can look finished long before it becomes a usable asset.
 
-The awkward moment arrives after the visual direction has clicked. Everyone recognizes
-the mark. It works in a presentation. Then somebody asks for the SVG, the favicon, the
-one-color version, or a print-ready file. The source turns out to be a raster image with
-soft edges, accidental asymmetry, color noise, and lettering that cannot be trusted.
+We needed an identity that could express forward delivery, technical intervention, and
+upward improvement without collapsing into a workflow diagram or a generic
+external-link mark. The visual brief was concise. The path to production was still
+open.
 
-Our own identity moved through three representations. The first concept was generated
-directly as SVG by a language model. GPT Image in ChatGPT then found a much simpler
-two-gesture direction as a raster image. Finally, Codex reconstructed that direction as
-explicit SVG geometry and built the production files around it.
+The uncertainty changed shape as the work progressed. At first, we did not know which
+visual metaphor was right. Later, we knew the silhouette but not its exact geometry.
+Then the remaining risks moved into typography, small-size behavior, file portability,
+and print output. Each stage needed a different tool and a different kind of evidence.
 
-That round trip shifted our attention from ranking models to matching each
-representation with the uncertainty in front of us. Visual search, geometric
-construction, typography, and file validation turned out to be different jobs.
+Our identity moved through three representations. A language model generated the first
+concept directly as SVG. GPT Image in ChatGPT found the simpler two-gesture direction
+as a raster image. Codex then reconstructed that direction as explicit geometry and
+built the production system around it.
+
+The result is a complete identity family that remains distinct at 16 pixels and at
+10 mm in print. It includes editable and outlined lockups, full-color and one-color
+artwork, knockout and dark-background variants, favicons, avatars, screen exports,
+print files, and usage guidance. The entire package rebuilds from source with one
+command.
+
+The project gave us a reusable operating principle: keep uncertainty visible, give each
+tool a bounded job, and change representations as decisions harden.
 
 ## Choose the representation before the model
+
+Early in the project, metaphor, composition, and silhouette were open. The production
+requirements were already fixed: two elements, sharp corners, an open gap, flat color,
+one-color recognition, and a mark that stayed clear at small sizes. That split kept
+exploration open while giving every output a rejection test.
 
 There is no universally best AI workflow for logo design. The useful choice depends on
 what is still unknown.
@@ -45,19 +60,20 @@ what is still unknown.
 - **Use a vector editor** for organic curves, expressive lettering, Boolean construction,
   and optical adjustments that are easier to see than to specify numerically.
 
-The first Relux concept shows why output format alone does not solve the design problem.
-The model produced real SVG and encoded our four-step agent loop with impressive
-literal accuracy. The result still behaved like a workflow diagram.
+The first Relux concept did useful diagnostic work. The model produced real SVG and
+encoded our four-step agent loop with impressive literal accuracy. At logo scale it
+behaved like process machinery, with associations closer to sync or recycling than to
+a confident company mark.
 
 [![An early Relux concept generated directly as SVG, showing a four-arrow agent cycle around a red core](/blog/when-ai-should-write-svg/llm-svg-concept.png)](/blog/when-ai-should-write-svg/llm-svg-concept.png)
 
 *Direct SVG generation captured the system. It also revealed that the system was too
 much information for one mark.*
 
-GPT Image was more useful at that stage because the remaining question concerned
-visual reduction: how much could we remove while keeping motion and intervention? Its
-answer was a large right-facing red chevron and a smaller northeast arrow. That
-silhouette became the direction. The generated pixels did not become the master.
+That diagnosis gave us a clear next step: change representation and focus on visual
+reduction. How much could we remove while keeping motion and intervention? GPT Image
+answered with a large right-facing red chevron and a smaller northeast arrow. That
+silhouette became the direction. The generated pixels remained a reference.
 
 For this kind of exploration, a short acceptance contract is more useful than a long
 stylistic prompt:
@@ -78,6 +94,9 @@ Approve:
 
 Judge the result against that contract. Generated type should be replaced, and the
 raster should remain a reference even when the visual direction is approved.
+
+This separated exploration from approval. The image model could propose freely while
+the contract defined what evidence counted.
 
 ## Direct SVG generation asks for construction
 
@@ -108,6 +127,10 @@ at `(88, 50)`, reflect the red arms across the centerline, verify the arrow's sy
 about its 45-degree axis, and calculate the minimum gap. The resulting
 [production SVG](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/assets/relux-symbol.svg)
 is small enough to understand without an editor.
+
+By the time we returned to SVG, the visual uncertainty was resolved. The remaining job
+was to encode the agreed relationships precisely enough to inspect, reproduce, and
+test.
 
 A useful direct-SVG prompt behaves like a production contract:
 
@@ -156,9 +179,13 @@ contained gradients and color variation that did not belong to the identity.
 A trace begins from visible pixel contours. Thresholding and smoothing may discard or
 alter some defects, but they cannot infer which relationships were intended. A faithful
 trace risked preserving those differences; an aggressive one risked distorting them.
-Neither could know which ones to correct. We kept the recognizable decisions instead:
-two elements, two directions, square cuts, one flat red, one ink value, and an open
-internal gap. The final clearance is exactly `0.4T`.
+Neither could know which ones to correct.
+
+Reconstruction was the decisive production step. We preserved the recognizable
+direction and replaced incidental pixels with explicit relationships: two elements,
+two directions, square cuts, mirrored red arms, one flat red, one ink value, and an
+open internal gap. The final clearance is exactly `0.4T`. At that point, an approved
+picture became an identity system.
 
 [![The GPT Image raster direction beside the manually reconstructed production vector](/blog/when-ai-should-write-svg/before-after.png)](/blog/when-ai-should-write-svg/before-after.png)
 
@@ -171,9 +198,9 @@ negative space. Pixels do not contain those relationships.
 
 ## We used Inkscape as a compiler
 
-Inkscape played a narrow and important role in our build. We did not use Trace Bitmap,
-and we did not draw the symbol in the GUI. The symbol paths came directly from the
-coordinate source.
+We assigned Inkscape the part of the pipeline it could make deterministic: converting
+pinned live type into portable production outlines. It did not trace or redraw the
+symbol. Those paths remained governed by the coordinate source.
 
 The wordmark was different. We wanted an editable live-type master in Inter Bold 700
 and portable production lockups with outlined letters. The build bundled the official
@@ -228,11 +255,12 @@ files before running the checks.
 
 ## Native-size rendering is part of drawing
 
-Mathematical equality settles some questions. Optical balance settles others.
+Optical balance still needs judgment. We made that judgment reviewable by converting
+one concern, the black arrow's apparent weight, into a controlled experiment.
 
-We built two controlled arrow candidates. One gave the black stem the same thickness
-as a red arm. The other reduced it to 95 percent. Every other coordinate stayed fixed.
-Both looked plausible when enlarged.
+We built two arrow candidates. One gave the black stem the same thickness as a red
+arm. The other reduced it to 95 percent. Every other coordinate stayed fixed. Both
+looked plausible when enlarged.
 
 At 24 pixels, the thinner arrow lost presence without making the gap feel more open.
 The equal-weight version won. Its smaller footprint already provided the hierarchy.
@@ -285,6 +313,10 @@ emit `eofill`, then used
 [Ghostscript](https://ghostscript.readthedocs.io/en/latest/Use.html) to render every EPS
 and confirm that visible pixels actually existed.
 
+Both faults were caught inside the build before an asset could be approved or shipped.
+The pipeline made errors cheap to find, visible to reviewers, and straightforward to
+correct.
+
 The important part of the final audit was its failure model. Parsing, inspecting
 resources, verifying geometry, and rendering pixels answer different questions. No
 single check can stand in for the others.
@@ -293,6 +325,29 @@ single check can stand in for the others.
 
 *One-color recognition is a geometry test. The two forms remain separate without
 depending on red versus black.*
+
+## The result shipped as an identity system
+
+The raster direction became a governed family of production assets:
+
+- a two-path master symbol, an editable live-type horizontal source, and outlined
+  horizontal and stacked lockups;
+- full-color, one-color, knockout, light-background, and dark-background artwork;
+- transparent PNGs, native ICO frames, a theme-aware favicon, touch icon, avatar, and
+  social image;
+- DeviceCMYK PDF and EPS files, proof sheets, and concise usage guidance;
+- a reproducible build that regenerates sources, exports, proofs, and checks through
+  one command.
+
+The website now uses the approved artwork in its header, footer, favicon bundle,
+social metadata, and localized pages. The mark remains left-to-right inside RTL layouts
+and switches to approved one-color artwork in forced-colors mode. The public
+[brand reference](https://github.com/relux-works/relux-product-web-design/blob/0c5a66988ae04a1ae2128e43c1826ea88b24384d/references/brand-identity.md)
+keeps those rules inspectable for product teams and future agents.
+
+The delivery gave the team assets it could use immediately and a controlled source for
+future changes. Those changes now begin from an authoritative source with reproducible
+exports.
 
 ## A reusable AI-assisted logo pipeline
 
@@ -312,5 +367,15 @@ The process now fits into seven steps that travel well beyond this mark.
 7. **Ship the method with the files.** Include source geometry, generation scripts,
    proofs, color and spacing rules, and one validation command.
 
-The production file now remembers the decisions behind the mark instead of the
-accidents of its preview. That is the standard we would use for the next identity too.
+The project succeeded because we knew which kind of uncertainty each tool could
+resolve, stopped each tool at its boundary, and converted the accepted direction into
+a system ready for real delivery.
+
+That operating model underpins our [AI MVP development](/en/ai-mvp-development/),
+[vibe-code rescue](/en/vibe-code-rescue/), and
+[agentic enablement](/en/agentic-enablement/). Engineers define the constraints and
+verification boundaries. Agents move quickly inside them. Relux Works remains
+accountable for what ships and how it is handed over.
+
+If you have a promising AI-generated direction that needs production discipline,
+[tell us what you are building](/en/#contact).
