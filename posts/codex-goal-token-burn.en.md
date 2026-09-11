@@ -568,6 +568,15 @@ in the neighboring product.
   as acceptable forms of a verified wait, otherwise even a model with the
   tool will go poll the shell.
 
+### How to check your own sessions
+
+Every table in this text can be reproduced on your own rollouts with one
+script: [codex-rollout-audit](https://github.com/relux-works/codex-rollout-audit),
+a single Python file with no dependencies. It reads `~/.codex/sessions`,
+sends nothing anywhere, and prints the per-session summary, the limit
+exhaustion episodes, a per-turn view of one session and the count of
+rejected float arguments.
+
 ### How to turn sleep on for yourself
 
 The flag lives in `~/.codex/config.toml`:
