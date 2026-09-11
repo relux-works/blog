@@ -14,10 +14,6 @@ authors:
     title: "CTO / Founding Engineer, Relux Works"
     links:
       - "https://www.linkedin.com/in/alexis-grigoryev-22bab159/"
-  - name: "Timur Kackan"
-    title: "AI/ML Engineer, Relux Works"
-    links:
-      - "https://www.linkedin.com/in/timur-kachkan/"
 aiSystems:
   - "Claude Fable 5.1"
 ---
