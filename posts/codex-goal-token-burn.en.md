@@ -529,7 +529,8 @@ The main number: what one hour of waiting costs at comparable context.
 
 Session A waited 7.8 hours and spent 650 million input tokens on it, 271
 steps per hour. Session B waited 92 hours and spent 1.85 billion, 43 steps
-per hour, with the model running `sleep 30` through the shell 61 times. The source session made 466 calls in 48 minutes of goal loop, 590 per hour, and
+per hour, with the model running `sleep 30` through the shell 61 times. The
+source session made 466 calls in 48 minutes of goal loop, 590 per hour, and
 spent 149 million. The top bar is an estimate for the same context with a
 notification: one or two steps per event.
 
