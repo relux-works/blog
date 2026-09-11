@@ -99,6 +99,13 @@ needs, it eats the window even at a discount. So from here on I show input
 tokens in full, as the client counts them, and don't try to convert them
 into limit percentages.
 
+The formula is not the point. However cached input is accounted for, at a
+discounted price in the API or through an unknown coefficient in the
+subscription, the current behavior multiplies it by hundreds and thousands
+where one call would do. An hour of waiting that could cost half a million
+tokens costs tens to hundreds of millions. At any coefficient that is
+massive overuse, and the rest of the text is about exactly that.
+
 ~~In the same caching docs OpenAI says plainly that for API rate limits
 cached tokens count as regular ones. The only thing we know about the
 subscription comes from experience: sessions where 98% of the input came
