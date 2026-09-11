@@ -229,6 +229,12 @@ Codex.
 принудительно включённый `sleep` ей не поможет: его аргумент `duration_ms`
 тоже целое.
 
+[![Дрейк отворачивается от 60000 и одобряет 60000.0](/blog/codex-goal-token-burn/drake-muse-spark.jpg)](https://knowyourmeme.com/memes/drakeposting)
+
+[![Гэндальф: You shall not pass](/blog/codex-goal-token-burn/gandalf-u64.jpg)](https://knowyourmeme.com/memes/you-shall-not-pass)
+
+Типизация Rust встречает `60000.0`.
+
 Откуда берутся 10 секунд. Когда модель запускает команду, Codex отдаёт ей
 управление по таймеру `yield_time_ms`, по умолчанию через 10 секунд.
 Продлить таймер можно только числом в аргументе, а числа у этой модели не
@@ -263,8 +269,9 @@ goal-расширение немедленно отправляет модели
 
 [![Ральф Виггам в автобусе: (chuckles) I'm in danger](/blog/codex-goal-token-burn/ralph-in-danger.jpg)](https://knowyourmeme.com/memes/ralph-in-danger-im-in-danger)
 
-Состояние модели в этот момент. Кадр из "The Simpsons Guy", через
-[Know Your Meme](https://knowyourmeme.com/memes/ralph-in-danger-im-in-danger).
+Ральф здесь не случайно: любой goal-режим это по сути
+[Ralph loop](https://ghuntley.com/ralph/), `while true; do codex "продолжай";
+done`, только встроенный в продукт. И лицо у него соответствующее.
 
 Слово "немедленно" здесь измеримо. В роковой сессии между концом одного хода и
 началом следующего проходило от 0.02 до 0.05 секунды, медиана 0.03. Ход при
