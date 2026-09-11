@@ -229,11 +229,10 @@ Codex.
 принудительно включённый `sleep` ей не поможет: его аргумент `duration_ms`
 тоже целое.
 
-[![Дрейк отворачивается от 60000 и одобряет 60000.0](/blog/codex-goal-token-burn/drake-muse-spark.jpg)](https://knowyourmeme.com/memes/drakeposting)
-
-[![Гэндальф: You shall not pass](/blog/codex-goal-token-burn/gandalf-u64.jpg)](https://knowyourmeme.com/memes/you-shall-not-pass)
-
-Типизация Rust встречает `60000.0`.
+<a href="https://knowyourmeme.com/memes/drakeposting"><picture>
+<source srcset="/blog/codex-goal-token-burn/drake-muse-spark-dark.jpg" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/drake-muse-spark.jpg" alt="Дрейк отворачивается от 60000 и одобряет 60000.0">
+</picture></a>
 
 Откуда берутся 10 секунд. Когда модель запускает команду, Codex отдаёт ей
 управление по таймеру `yield_time_ms`, по умолчанию через 10 секунд.
