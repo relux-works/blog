@@ -104,7 +104,7 @@ discounted price in the API or through an unknown coefficient in the
 subscription, the current behavior multiplies it by hundreds and thousands
 where one call would do. An hour of waiting that could cost half a million
 tokens costs tens to hundreds of millions. At any coefficient that is
-massive overuse, and the rest of the text is about exactly that.
+massive overuse.
 
 ~~In the same caching docs OpenAI says plainly that for API rate limits
 cached tokens count as regular ones. The only thing we know about the
