@@ -231,7 +231,7 @@ Codex.
 
 <a href="https://knowyourmeme.com/memes/drakeposting"><picture>
 <source srcset="/blog/codex-goal-token-burn/drake-muse-spark-dark.jpg" media="(prefers-color-scheme: dark)">
-<img src="/blog/codex-goal-token-burn/drake-muse-spark.jpg" alt="Дрейк отворачивается от 60000 и одобряет 60000.0">
+<img src="/blog/codex-goal-token-burn/drake-muse-spark-light.jpg" alt="Дрейк отворачивается от 60000 и одобряет 60000.0">
 </picture></a>
 
 Откуда берутся 10 секунд. Когда модель запускает команду, Codex отдаёт ей
