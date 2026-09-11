@@ -1,12 +1,10 @@
 ---
-title: "Why Codex burns a weekly limit in a day while the agent waits for the
-tide" description: "Spin-waiting in Codex CLI: goal mode restarts the model
-0.03 seconds after every turn and demands proof of waiting by live polling,
-the pause tool is issued to one model in the catalog, and every poll rereads a
-context of hundreds of thousands of tokens. In an archive of 3808 sessions,
-the 52 with goal mode ate half of all input tokens. How Claude Code solves the
-same task, and how to describe it in async/await terms." slug:
-"codex-goal-token-burn" lang: "en" draft: true authors:
+title: "Why Codex burns a weekly limit in a day while the agent waits for the tide"
+description: "Spin-waiting in Codex CLI: goal mode restarts the model 0.03 seconds after every turn and demands proof of waiting by live polling, the pause tool is issued to one model in the catalog, and every poll rereads a context of hundreds of thousands of tokens. In an archive of 3808 sessions, the 52 with goal mode ate half of all input tokens. How Claude Code solves the same task, and how to describe it in async/await terms."
+slug: "codex-goal-token-burn"
+lang: "en"
+draft: true
+authors:
   - name: "Ivan Oparin"
     title: "CEO / Founding Engineer, Relux Works"
     links:
