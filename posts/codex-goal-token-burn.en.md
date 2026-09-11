@@ -85,17 +85,28 @@ discounted rate.
 ### What about the subscription
 
 For a ChatGPT subscription the unit of accounting is a share of a limit in a
-sliding window. The formula behind that share isn't published. The Codex
-client only receives a usage percentage and a reset time from the server,
-visible in the
+sliding window. The formula that turns tokens into that share isn't
+published, and it is not a plain token-to-percent ratio. The Codex client
+only receives a usage percentage and a reset time from the server, visible
+in the
 [protocol](https://github.com/openai/codex/blob/rust-v0.154.0/codex-rs/protocol/src/protocol.rs)
-in the `RateLimitWindow` struct. Whether the cache discount applies there
-can't be checked from the outside. In the same caching docs OpenAI says
-plainly that for API rate limits cached tokens count as regular ones. The only
-thing we know about the subscription comes from experience: sessions where
-98% of the input came from the cache still blew through the weekly limit. So
-from here on I count input tokens in full, no discount: they appear to be what
-decides when you hit the wall.
+in the `RateLimitWindow` struct.
+
+The cache discount most likely applies there: without it a heavy session
+would empty the window in minutes, not in a day. But cached input isn't
+free, and when there are hundreds of millions more of it than the same work
+needs, it eats the window even at a discount. So from here on I show input
+tokens in full, as the client counts them, and don't try to convert them
+into limit percentages.
+
+~~In the same caching docs OpenAI says plainly that for API rate limits
+cached tokens count as regular ones. The only thing we know about the
+subscription comes from experience: sessions where 98% of the input came
+from the cache still blew through the weekly limit. So from here on I count
+input tokens in full, no discount: they appear to be what decides when you
+hit the wall.~~ Struck out after a Reddit discussion: the API rule is about
+per-minute request limits, not the plan, and carrying it over to the
+subscription was a mistake.
 
 ## What "waiting" means
 
