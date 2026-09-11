@@ -1,10 +1,12 @@
 ---
-title: "Why Codex burns a weekly limit in a day while the agent waits for the tide"
-description: "Spin-waiting in Codex CLI: goal mode restarts the model 0.03 seconds after every turn and demands proof of waiting by live polling, the pause tool is issued to one model in the catalog, and every poll rereads a context of hundreds of thousands of tokens. In an archive of 3808 sessions, the 52 with goal mode ate half of all input tokens. How Claude Code solves the same task, and how to describe it in async/await terms."
-slug: "codex-goal-token-burn"
-lang: "en"
-draft: true
-authors:
+title: "Why Codex burns a weekly limit in a day while the agent waits for the
+tide" description: "Spin-waiting in Codex CLI: goal mode restarts the model
+0.03 seconds after every turn and demands proof of waiting by live polling,
+the pause tool is issued to one model in the catalog, and every poll rereads a
+context of hundreds of thousands of tokens. In an archive of 3808 sessions,
+the 52 with goal mode ate half of all input tokens. How Claude Code solves the
+same task, and how to describe it in async/await terms." slug:
+"codex-goal-token-burn" lang: "en" draft: true authors:
   - name: "Ivan Oparin"
     title: "CEO / Founding Engineer, Relux Works"
     links:
@@ -22,23 +24,32 @@ aiSystems:
   - "Claude Fable 5.1"
 ---
 
-On that fateful night our Codex orchestrator spawned its children and settled
-in to wait for them. The model was muse-spark 1.3: I wanted it for free,
-through the opencode provider, and since Codex is what I'm used to, that's
-where I set it up (kudos to the Muse team for phenomenal progress: 1.3 is
-already a strong model, and I can't wait for 1.4). In the morning the log had
-173 automatic continuations in 48 minutes: read the tail of the log, write "no
-changes", read the tail again. Every continuation reread a context of 120 to
-470 thousand tokens. The provider is what stopped it: at 00:03 it answered
-429. From here on I call this session the fateful one, and the text keeps
-coming back to it.
+## TL;DR
 
-This is a text about why that happens. For scale: my Codex account is the
-$200 Pro plan, 75 billion tokens in a year, 50 of them in the last three
-months, and the weekly limit ran out more than ten times this summer (it was a
-lively summer, I'm slightly unhinged when it comes to agents, and about eight
-banked resets plus the global ones from Tibo helped). The upside is that at
-this volume the problem is in plain sight.
+- Our Codex orchestrator was waiting for its child agents. The model was
+  muse-spark 1.3 through the opencode provider (kudos to the Muse team, 1.3
+  is already a strong model). In 48 minutes goal mode launched 173
+  continuations, each rereading 120 to 470 thousand tokens of context, until
+  the provider answered 429. From here on this is the source session.
+- The cause: goal mode restarts the model 0.03 seconds after every turn and
+  counts waiting only if the model polled a live process, while the pause
+  tool `clock.sleep` is issued only to the recently released `gpt-6-astra`.
+  Waiting turns into a spin: every check costs the full context.
+- The price: out of 3808 sessions from July to September 2026, the 52 with
+  goal mode ate half of 59.2 billion input tokens. An hour of waiting cost 83
+  to 188 million. The weekly limit of a $200 Pro account ran out fifteen
+  times over the summer, with a median of 23 hours from the start of the
+  window.
+- What to do: the simplest option is to take `gpt-6-astra` at minimal effort
+  as the floor for goal tasks, it is the only model with `sleep` out of the
+  box. Otherwise turn `sleep` on through the config for the other models,
+  wait for all child processes with a single call and put a budget on every
+  goal. We are rolling out the second path ourselves but have not verified
+  it at scale yet. On the Codex side: issue `sleep` whenever a goal is
+  active and pause between continuations, the way Claude Code does.
+- All numbers are for Codex 0.154 and rollouts from July, August and
+  September 2026. Every claim about the mechanics links to the Codex source
+  on GitHub; the rollouts themselves are not published.
 
 ## How tokens are counted
 
@@ -138,13 +149,13 @@ Everything that follows is about whether the model has one.
 
 ### In async/await terms
 
-For programmers (sorry, vibe coders) it's easier to think of this as a task
-on a scheduler. A model turn is a task run, the end of the turn is the point
+For programmers (sorry, vibe coders) it's easier to think of this as an async
+task. A model turn is a task run, the end of the turn is the point
 where the task yields control. There are three ways to wait for an external
 event, and all three are familiar from asynchronous code.
 
 ```
-// 1. await: the task is suspended, the scheduler keeps the continuation
+// 1. await: the task is suspended, the runtime keeps the continuation
 let result = await child.finished     // zero calls while we wait
 handle(result)                        // one call on the event
 
@@ -227,7 +238,7 @@ reading its output with an empty-input `write_stdin`. That empty call can wait
 longer, up to five minutes. So even without `sleep` the model has a legitimate
 way to pay one call for five minutes of waiting.
 
-In the fateful session that path was closed. muse-spark was running through a
+In the source session that path was closed. muse-spark was running through a
 custom provider and passed numbers in tool arguments as floats: `60000.0`
 instead of `60000`. The Codex parser expects an integer and rejects the call.
 The archive shows it across every session on this model: 10 of 10
@@ -249,7 +260,7 @@ wait up to five minutes, fails for the same reason. So one trip to the shell
 never lasts longer than 10 seconds, whatever the model writes.
 
 In practice the model never even reached that ceiling. Its poll was a
-snapshot: the command read the child's event log and came back within a
+snapshot: the command read the child process's event log and came back within a
 second. The rest of the turn went into two model calls, one to launch the poll
 and one to write "no changes". The median turn was ten seconds, the mean
 seventeen counting the longer turns, and goal launches the next one right
@@ -261,14 +272,14 @@ For comparison, on the official `gpt-5.6-sol` the same loop in session A cost
 83 million per hour: there the model waited 30 seconds per call, the ceiling
 for a running command. In session B, 20 million: the model kept reading output
 with an empty `write_stdin` and got five minutes of pause per call. The longer
-the pause inside a single call, the cheaper the hour. The fateful session took
+the pause inside a single call, the cheaper the hour. The source session took
 the last brake off the loop, and that's how the bug became visible.
 
 ## What goal mode adds
 
 Without goal the model has an escape hatch: end the turn and go quiet. Even
 without `sleep` that's a free pause. The human comes back, writes something,
-we continue. In scheduler terms it's the first variant, await: the task
+we continue. In async terms it's the first variant, await: the task
 yielded control, and nobody wakes it until an event happens.
 
 Goal mode removes that hatch too. As soon as the thread becomes idle, the goal
@@ -287,7 +298,7 @@ Ralph is here for a reason: any goal mode is essentially a
 `while true; do codex "continue"; done`, just built into the product. The
 face fits.
 
-The word "immediately" is measurable here. In the fateful session, between
+The word "immediately" is measurable here. In the source session, between
 the end of one turn and the start of the next there were 0.02 to 0.05
 seconds, median 0.03. A turn usually lasted ten seconds: exactly what the
 model needs to read the context, call one poll and write "no changes". The
@@ -295,7 +306,7 @@ polling frequency was set by the model's response latency and nothing else.
 
 <a href="/blog/codex-goal-token-burn/turn-cadence-en-light.png"><picture>
 <source srcset="/blog/codex-goal-token-burn/turn-cadence-en-dark.png" media="(prefers-color-scheme: dark)">
-<img src="/blog/codex-goal-token-burn/turn-cadence-en-light.png" alt="Two and a half minutes of the fateful session: turns of 8 to 27 seconds with 0.03-second gaps">
+<img src="/blog/codex-goal-token-burn/turn-cadence-en-light.png" alt="Two and a half minutes of the source session: turns of 8 to 27 seconds with 0.03-second gaps">
 </picture></a>
 
 There is an important moment in this picture. At 23:50 I asked the model why
@@ -311,8 +322,8 @@ It has a paragraph about waiting. Waiting only counts if in this turn the
 model polled a live process. "I'm waiting" without a poll counts as no
 progress. The model itself can only move the goal to `complete` or `blocked`,
 and `blocked` is allowed after three identical blockers in a row, while
-waiting for children doesn't count as a blocker. Only a human can pause the
-goal.
+waiting for child processes doesn't count as a blocker. Only a human can pause
+the goal.
 
 The result is a trap:
 
@@ -323,7 +334,7 @@ The result is a trap:
 
 The model follows the requirement literally. The requirement is phrased so
 that the behavior that is correct by the contract is the most expensive in
-tokens. In scheduler terms the goal extension is a dispatcher with a single
+tokens. In async terms the goal extension is a dispatcher with a single
 rule: the queue is empty, enqueue the same task again. And the contract
 forbids the task to suspend in any way other than polling. Together that's a
 spin, the third variant on the list.
@@ -391,46 +402,46 @@ tool calls.
 Our orchestrator works like this: it doesn't write code itself, it hands
 tasks to child agents, each in its own branch with its own context. That
 parallelizes the work and keeps the parent's context from bloating. But the
-parent has to wait for the children, and there are usually many of them.
+parent has to wait for the child processes, and there are usually many of them.
 
-With one child it's still cheap. There's a command that blocks the turn until
-the child finishes, and it's the same case as `sleep 5`: one step, except the
-duration is set by an event rather than a timer. The ceiling for a single call
-in Codex is about five minutes, that's how long an empty `write_stdin` can
-wait, so a three-hour child costs about 36 calls in a row. That's 12 steps
-per hour, not 270.
+With one child process it's still cheap. There's a command that blocks the
+turn until the process finishes, and it's the same case as `sleep 5`: one
+step, except the duration is set by an event rather than a timer. The ceiling
+for a single call in Codex is about five minutes, that's how long an empty
+`write_stdin` can wait, so a three-hour process costs about 36 calls in a row.
+That's 12 steps per hour, not 270.
 
 With two or more, everything changes. While the orchestrator is blocked on
-child A, child B can finish, crash or ask for help, and the orchestrator won't
-see it. If all it needed was the fact "both finished", it could wait for A,
-then B, and that would still be cheap. But the orchestrator has to react along
-the way: accept a result, lift a lock, restart the one that crashed. So it
-doesn't dare block for long and replaces the block with a short loop: look at
-A, look at B, wait, again. Bottom line: one child is a known wait, N children
-without a shared barrier is polling. The sessions below show it literally:
-the orchestrator knew about the blocking wait and used it 31 times, but
-between the blocks it still walked through both children's logs.
+process A, process B can finish, crash or ask for help, and the orchestrator
+won't see it. If all it needed was the fact "both finished", it could wait for
+A, then B, and that would still be cheap. But the orchestrator has to react
+along the way: accept a result, lift a lock, restart the one that crashed. So
+it doesn't dare block for long and replaces the block with a short loop: look
+at A, look at B, wait, again. Bottom line: one child process is a known wait,
+N processes without a shared barrier is polling. The sessions below show it
+literally: the orchestrator knew about the blocking wait and used it 31 times,
+but between the blocks it still walked through both processes' logs.
 
 The same thing happens in any pattern where an agent starts several long
 processes and can't get notified: several CI runs, a build and a deploy in
-parallel, several remote jobs. An orchestrator with children is just the most
-common case.
+parallel, several remote jobs. An orchestrator with child processes is just
+the most common case.
 
-Codex has its own barrier over several children, the `wait_agent` tool,
+Codex has its own barrier over several child agents, the `wait_agent` tool,
 described as "pass multiple ids to wait for whichever finishes first", see
 [`multi_agents_spec.rs`](https://github.com/openai/codex/blob/rust-v0.154.0/codex-rs/core/src/tools/handlers/multi_agents_spec.rs).
 But it only sees agents that Codex itself spawned through `spawn_agent`. Our
-orchestrator's children don't exist for it.
+orchestrator's child processes don't exist for it.
 
-## What the model had on that fateful night
+## What the model had in the source session
 
 Here are the ways to wait that a model in Codex has in theory, and what
-happened to each of them in the fateful session.
+happened to each of them in the source session.
 
 | Way to wait | What happened |
 |---|---|
 | `clock.sleep` | Not issued: a model on a custom provider has no `clock` in the catalog |
-| `wait_agent`, the barrier over several children | The children aren't Codex agents, the tool can't see them; in the next session that same night an attempt at a native `spawn_agent` returned `unsupported call` |
+| `wait_agent`, the barrier over several child agents | The child processes aren't Codex agents, the tool can't see them; in the next session that same night an attempt at a native `spawn_agent` returned `unsupported call` |
 | Empty-input `write_stdin`, up to 5 minutes per call | The only attempt failed: `floating point 36429.0, expected i32` |
 | `yield_time_ms` longer than 10 seconds | The only attempt failed: `floating point 60000.0, expected u64` |
 | `sleep` in the shell | Ten times, 4 to 8 seconds each; anything over 10 seconds would have been cut off by unified exec |
@@ -444,7 +455,7 @@ exactly one such command.
 
 <a href="/blog/codex-goal-token-burn/night-session-calls-en-light.png"><picture>
 <source srcset="/blog/codex-goal-token-burn/night-session-calls-en-dark.png" media="(prefers-color-scheme: dark)">
-<img src="/blog/codex-goal-token-burn/night-session-calls-en-light.png" alt="The fateful session: 544 model calls, input tokens of every call, the goal loop highlighted">
+<img src="/blog/codex-goal-token-burn/night-session-calls-en-light.png" alt="The source session: 544 model calls, input tokens of every call, the goal loop highlighted">
 </picture></a>
 
 This picture also gives us a natural experiment. While goal is active, the
@@ -498,10 +509,10 @@ human or by the orchestrator itself, orange ones by goal mode.
 <img src="/blog/codex-goal-token-burn/session-a-timeline-en-light.png" alt="Session A: input tokens per turn, goal continuations highlighted">
 </picture></a>
 
-The orange bars are hours of log polling. The tallest, 71 million tokens, is
-a single three-hour turn with 439 tool calls, mostly `tail` on the children's
-logs. On the right, four nearly invisible orange bars are empty continuations
-within 20 seconds.
+The orange bars are hours of log polling. The tallest, 71 million tokens, is a
+single three-hour turn with 439 tool calls, mostly `tail` on the child
+processes' logs. On the right, four nearly invisible orange bars are empty
+continuations within 20 seconds.
 
 The main number: what one hour of waiting costs at comparable context.
 
@@ -512,8 +523,7 @@ The main number: what one hour of waiting costs at comparable context.
 
 Session A waited 7.8 hours and spent 650 million input tokens on it, 271
 steps per hour. Session B waited 92 hours and spent 1.85 billion, 43 steps
-per hour, with the model running `sleep 30` through the shell 61 times. The
-fateful session made 466 calls in 48 minutes of goal loop, 590 per hour, and
+per hour, with the model running `sleep 30` through the shell 61 times. The source session made 466 calls in 48 minutes of goal loop, 590 per hour, and
 spent 149 million. The top bar is an estimate for the same context with a
 notification: one or two steps per event.
 
@@ -574,7 +584,7 @@ providers that write `60000.0` instead of `60000`, the tool won't work until
 number serialization is fixed.
 
 At home we turned `sleep` on through the config, we're teaching the
-orchestrator to wait for all its children with a single call, and we put a
-budget on every goal. The formula is the same: number of checks times size of
-context. Until the model is given a way to wait without spending a step, the
-one who waits is the one who pays.
+orchestrator to wait for all its child processes with a single call, and we
+put a budget on every goal. The formula is the same: number of checks times
+size of context. Until the model is given a way to wait without spending a
+step, the one who waits is the one who pays.
