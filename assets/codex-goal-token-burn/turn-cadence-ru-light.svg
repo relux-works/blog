@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="330" viewBox="0 0 1100 330" role="img" aria-label="Каденс ходов в goal-цикле">
 <rect width="1100" height="330" fill="#fcfcfb"/>
-<text x='40.0' y='34.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>Две с половиной минуты ночной сессии: ходы и зазоры между ними</text>
+<text x='40.0' y='34.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>Две с половиной минуты роковой сессии: ходы и зазоры между ними</text>
 <text x='40.0' y='56.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>Каждый прямоугольник это один ход, все двенадцать запустил goal-режим. Между ходами 0.02–0.05 секунды.</text>
 <rect x='41.0' y='120' width='119.1' height='56' rx='3' fill='#eb6834'/>
 <text x='100.5' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#fcfcfb'>17 с</text>

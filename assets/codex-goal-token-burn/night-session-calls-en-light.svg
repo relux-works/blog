@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-label="Ночная сессия, каждый вызов модели">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-label="The fateful session, every model call">
 <rect width="1100" height="560" fill="#fcfcfb"/>
-<text x='64.0' y='34.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>Ночная сессия: каждый вызов модели</text>
-<text x='64.0' y='56.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>544 вызова за 2 часа 37 минут. Высота столбца это входные токены вызова, тысячи. Время местное.</text>
+<text x='64.0' y='34.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>The fateful session: every model call</text>
+<text x='64.0' y='56.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>544 calls in 2 hours 37 minutes. Bar height is the input tokens of the call, thousands. Local time.</text>
 <line x1='64' x2='1070' y1='440.0' y2='440.0' stroke='#e6e5e1'/>
 <text x='56.0' y='444.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#52514e'>0</text>
 <line x1='64' x2='1070' y1='386.7' y2='386.7' stroke='#e6e5e1'/>
@@ -583,19 +583,19 @@
 <text x='948.1' y='460.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#52514e'>01:30</text>
 <line x1='1039.5' x2='1039.5' y1='440' y2='445' stroke='#52514e'/>
 <text x='1039.5' y='460.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#52514e'>01:45</text>
-<text x='131.1' y='112.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>23:16–00:03 goal-цикл: 173 автопродолжения, 466 вызовов, 149 млн токенов</text>
+<text x='131.1' y='112.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>23:16 to 00:03 goal loop: 173 auto-continuations, 466 calls, 149M tokens</text>
 <line x1='131.1' x2='420.7' y1='122' y2='122' stroke='#52514e'/>
 <line x1='131.1' x2='131.1' y1='122' y2='128' stroke='#52514e'/>
 <line x1='420.7' x2='420.7' y1='122' y2='128' stroke='#52514e'/>
-<text x='1063.9' y='112.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>01:24 человек вернулся; 01:34 goal возобновлён, опрос каждые 12 с</text>
-<text x='1063.9' y='128.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>01:35 пауза; 01:43 продолжение без goal: пять вызовов, конец</text>
+<text x='1063.9' y='112.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>01:24 the human is back; 01:34 goal resumed, a poll every 12 s</text>
+<text x='1063.9' y='128.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>01:35 paused; 01:43 continuing without goal: five calls, the end</text>
 <line x1='899.3' x2='1045.6' y1='134' y2='134' stroke='#52514e'/>
 <line x1='899.3' x2='899.3' y1='134' y2='140' stroke='#52514e'/>
 <line x1='1045.6' x2='1045.6' y1='134' y2='140' stroke='#52514e'/>
-<text x='76.2' y='146.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>23:07 старт: один ход на 9 минут, 52 вызова</text>
+<text x='76.2' y='146.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>23:07 start: one 9-minute turn, 52 calls</text>
 <line x1='88.4' x2='88.4' y1='152' y2='396.0' stroke='#52514e'/>
-<text x='429.8' y='146.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>00:03 провайдер ответил 429, цикл встал</text>
+<text x='429.8' y='146.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>00:03 the provider answered 429, the loop stopped</text>
 <line x1='419.5' x2='419.5' y1='152' y2='182.7' stroke='#52514e'/>
-<rect x='64' y='519' width='14' height='14' rx='3' fill='#2a78d6'/><text x='84.0' y='531.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>ход начал человек</text>
-<rect x='284' y='519' width='14' height='14' rx='3' fill='#eb6834'/><text x='304.0' y='531.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>ход начал goal-режим (автопродолжение)</text>
+<rect x='64' y='519' width='14' height='14' rx='3' fill='#2a78d6'/><text x='84.0' y='531.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>turn started by a human</text>
+<rect x='314' y='519' width='14' height='14' rx='3' fill='#eb6834'/><text x='334.0' y='531.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#0b0b0b'>turn started by goal mode (auto-continuation)</text>
 </svg>

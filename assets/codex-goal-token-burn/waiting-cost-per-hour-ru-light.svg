@@ -16,5 +16,5 @@
 <text x='40.0' y='308.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>Опрос через шелл, сессия A: 271 шаг в час</text>
 <rect x='40' y='388' width='770.8' height='44' rx='4' fill='#2a78d6'/>
 <text x='822.8' y='416.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#0b0b0b'>188 M</text>
-<text x='40.0' y='380.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>Goal-цикл без sleep, ночная сессия: 590 шагов в час</text>
+<text x='40.0' y='380.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>Goal-цикл без sleep, роковая сессия: 590 шагов в час</text>
 </svg>

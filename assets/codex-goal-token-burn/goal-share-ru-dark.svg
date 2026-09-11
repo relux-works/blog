@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="210" viewBox="0 0 1000 210" role="img" aria-label="Доля goal-сессий в токенах">
+<rect width="1000" height="210" fill="#111411"/>
+<text x='40.0' y='36.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#e7ebe7'>3808 роллаутов, 59.2 млрд входных токенов</text>
+<text x='40.0' y='60.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>52 сессии с включённым goal-режимом против остальных 3756.</text>
+<rect x='40' y='90' width='453.8' height='48' rx='4' fill='#f07a4a'/>
+<rect x='495.8' y='90' width='464.2' height='48' rx='4' fill='#4d95ea'/>
+<text x='40.0' y='166.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#e7ebe7'>52 goal-сессии: 29.2 млрд, 49%</text>
+<text x='960.0' y='166.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#e7ebe7'>3756 остальных: 29.9 млрд, 51%</text>
+</svg>

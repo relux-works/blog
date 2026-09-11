@@ -161,7 +161,10 @@ while !child.finished {
 эту память заново. Это как цикл `while`, в котором на каждом обороте
 копируется вся куча процесса.
 
-[![Одна минута ожидания тремя способами: await, sleep-опрос, спин](/blog/codex-goal-token-burn/wait-primitives.png)](/blog/codex-goal-token-burn/wait-primitives.png)
+<a href="/blog/codex-goal-token-burn/wait-primitives-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/wait-primitives-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/wait-primitives-ru-light.png" alt="Одна минута ожидания тремя способами: await, sleep-опрос, спин">
+</picture></a>
 
 Какой из трёх вариантов достаётся модели, решает диспетчер, который запускает
 её ходы, и набор инструментов, который ей выдали. Дальше про то, что выдаёт
@@ -286,7 +289,10 @@ goal-расширение немедленно отправляет модели
 чтобы прочитать контекст, вызвать один опрос и написать "без изменений".
 Частоту опроса задавала задержка ответа модели, ничего больше.
 
-[![Две с половиной минуты роковой сессии: ходы по 8–27 секунд с зазорами 0.03 секунды](/blog/codex-goal-token-burn/turn-cadence.png)](/blog/codex-goal-token-burn/turn-cadence.png)
+<a href="/blog/codex-goal-token-burn/turn-cadence-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/turn-cadence-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/turn-cadence-ru-light.png" alt="Две с половиной минуты роковой сессии: ходы по 8–27 секунд с зазорами 0.03 секунды">
+</picture></a>
 
 На этой картинке есть важный момент. В 23:50 я спросил модель, почему она
 так часто проверяет. Модель ответила: "Контракт гола требует каждый ход
@@ -431,7 +437,10 @@ N детей без общего барьера это поллинг. В сес
 заперта контрактом. Осталось то, что мы видели в логе: один опрос на ход. Из 181
 хода сессии 135 состояли ровно из одной такой команды.
 
-[![Роковая сессия: 544 вызова модели, входные токены каждого вызова, goal-цикл выделен](/blog/codex-goal-token-burn/night-session-calls.png)](/blog/codex-goal-token-burn/night-session-calls.png)
+<a href="/blog/codex-goal-token-burn/night-session-calls-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/night-session-calls-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/night-session-calls-ru-light.png" alt="Роковая сессия: 544 вызова модели, входные токены каждого вызова, goal-цикл выделен">
+</picture></a>
 
 Эта картинка заодно даёт естественный эксперимент. Пока goal активен,
 оранжевые столбцы идут сплошной стеной, и каждый выше предыдущего, потому
@@ -455,7 +464,10 @@ muse-модели через кастомных провайдеров.
 Goal-режим был включён в 52 сессиях из 3808, это полтора процента. Вот
 сколько они весят.
 
-[![52 goal-сессии занимают 49% входных токенов из 3808 сессий](/blog/codex-goal-token-burn/goal-share.png)](/blog/codex-goal-token-burn/goal-share.png)
+<a href="/blog/codex-goal-token-burn/goal-share-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/goal-share-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/goal-share-ru-light.png" alt="52 goal-сессии занимают 49% входных токенов из 3808 сессий">
+</picture></a>
 
 Полтора процента сессий съели половину токенов: 29.2 миллиарда из 59.2. Семь
 самых дорогих сессий архива, от 1.8 до 5.7 миллиарда каждая, все с
@@ -476,7 +488,10 @@ goal-режимом. Самая тяжёлая сессия без него ве
 Вот одна из goal-сессий по ходам. Синие ходы начал человек или сам
 оркестратор, оранжевые запустил goal-режим.
 
-[![Сессия A: входные токены на каждый ход, goal-продолжения выделены](/blog/codex-goal-token-burn/session-a-timeline.png)](/blog/codex-goal-token-burn/session-a-timeline.png)
+<a href="/blog/codex-goal-token-burn/session-a-timeline-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/session-a-timeline-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/session-a-timeline-ru-light.png" alt="Сессия A: входные токены на каждый ход, goal-продолжения выделены">
+</picture></a>
 
 Оранжевые столбцы это часы опроса логов. Самый высокий, 71 миллион токенов,
 это один ход длиной три часа с 439 вызовами инструментов, в основном `tail`
@@ -485,7 +500,10 @@ goal-режимом. Самая тяжёлая сессия без него ве
 
 Главная цифра: сколько стоит один час ожидания при сопоставимом контексте.
 
-[![Стоимость часа ожидания: от 0.5 миллиона с уведомлением до 188 миллионов в goal-цикле без sleep](/blog/codex-goal-token-burn/waiting-cost-per-hour.png)](/blog/codex-goal-token-burn/waiting-cost-per-hour.png)
+<a href="/blog/codex-goal-token-burn/waiting-cost-per-hour-ru-light.png"><picture>
+<source srcset="/blog/codex-goal-token-burn/waiting-cost-per-hour-ru-dark.png" media="(prefers-color-scheme: dark)">
+<img src="/blog/codex-goal-token-burn/waiting-cost-per-hour-ru-light.png" alt="Стоимость часа ожидания: от 0.5 миллиона с уведомлением до 188 миллионов в goal-цикле без sleep">
+</picture></a>
 
 Сессия A ждала 7.8 часа и потратила на это 650 миллионов входных токенов,
 271 шаг в час. Сессия B ждала 92 часа и потратила 1.85 миллиарда, 43 шага в

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="330" viewBox="0 0 1100 330" role="img" aria-label="Каденс ходов в goal-цикле">
+<rect width="1100" height="330" fill="#111411"/>
+<text x='40.0' y='34.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#e7ebe7'>Две с половиной минуты роковой сессии: ходы и зазоры между ними</text>
+<text x='40.0' y='56.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Каждый прямоугольник это один ход, все двенадцать запустил goal-режим. Между ходами 0.02–0.05 секунды.</text>
+<rect x='41.0' y='120' width='119.1' height='56' rx='3' fill='#f07a4a'/>
+<text x='100.5' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>17 с</text>
+<rect x='162.3' y='120' width='189.2' height='56' rx='3' fill='#f07a4a'/>
+<text x='256.9' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>27 с</text>
+<rect x='353.8' y='120' width='65.3' height='56' rx='3' fill='#f07a4a'/>
+<text x='386.4' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>10 с</text>
+<rect x='421.2' y='120' width='52.9' height='56' rx='3' fill='#f07a4a'/>
+<text x='447.7' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>8 с</text>
+<rect x='476.4' y='120' width='56.6' height='56' rx='3' fill='#f07a4a'/>
+<text x='504.7' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>8 с</text>
+<rect x='535.3' y='120' width='71.2' height='56' rx='3' fill='#f07a4a'/>
+<text x='570.9' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>10 с</text>
+<rect x='608.7' y='120' width='141.3' height='56' rx='3' fill='#f07a4a'/>
+<text x='679.4' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>20 с</text>
+<rect x='752.2' y='120' width='55.5' height='56' rx='3' fill='#f07a4a'/>
+<text x='780.0' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>8 с</text>
+<rect x='809.9' y='120' width='60.7' height='56' rx='3' fill='#f07a4a'/>
+<text x='840.3' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>9 с</text>
+<rect x='872.9' y='120' width='71.0' height='56' rx='3' fill='#f07a4a'/>
+<text x='908.4' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>10 с</text>
+<rect x='946.1' y='120' width='55.2' height='56' rx='3' fill='#f07a4a'/>
+<text x='973.7' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>8 с</text>
+<rect x='1003.5' y='120' width='65.5' height='56' rx='3' fill='#f07a4a'/>
+<text x='1036.3' y='153.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='600' fill='#0d100d'>10 с</text>
+<line x1='112.4' x2='112.4' y1='86' y2='116' stroke='#4d95ea' stroke-width='2'/>
+<text x='118.4' y='98.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#e7ebe7'>человек: "почему так часто проверяешь"</text>
+<text x='163.3' y='198.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#e7ebe7'>модель: "сбавляю, опрашиваю реже"</text>
+<line x1='159.3' x2='159.3' y1='178' y2='186' stroke='#bbc4bc'/>
+<text x='607.7' y='198.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='13' font-weight='normal' fill='#e7ebe7'>следующие десять ходов: один опрос и "Без изменений."</text>
+<line x1='40.0' x2='40.0' y1='216' y2='222' stroke='#bbc4bc'/>
+<text x='40.0' y='238.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>23:50:31</text>
+<line x1='250.6' x2='250.6' y1='216' y2='222' stroke='#bbc4bc'/>
+<text x='250.6' y='238.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>23:51:01</text>
+<line x1='461.1' x2='461.1' y1='216' y2='222' stroke='#bbc4bc'/>
+<text x='461.1' y='238.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>23:51:31</text>
+<line x1='671.7' x2='671.7' y1='216' y2='222' stroke='#bbc4bc'/>
+<text x='671.7' y='238.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>23:52:01</text>
+<line x1='882.2' x2='882.2' y1='216' y2='222' stroke='#bbc4bc'/>
+<text x='882.2' y='238.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>23:52:31</text>
+<line x1='40' x2='1070' y1='216' y2='216' stroke='#bbc4bc'/>
+<line x1='352.8' x2='352.8' y1='248' y2='260' stroke='#bbc4bc'/>
+<text x='352.8' y='276.0' text-anchor='middle' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='12' font-weight='normal' fill='#bbc4bc'>зазор между ходами: 0.03 с (медиана по 176 автопродолжениям)</text>
+</svg>

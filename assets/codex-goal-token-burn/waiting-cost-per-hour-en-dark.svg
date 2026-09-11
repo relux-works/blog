@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="470" viewBox="0 0 1000 470" role="img" aria-label="Cost of an hour of waiting in tokens">
+<rect width="1000" height="470" fill="#111411"/>
+<text x='40.0' y='36.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#e7ebe7'>What one hour of waiting costs in tokens</text>
+<text x='40.0' y='60.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Input tokens per hour, millions. Context of 120 to 470 thousand tokens, one task: wait for the children.</text>
+<rect x='40' y='100' width='6.0' height='44' rx='4' stroke='#4d95ea' stroke-width='2' fill='none' stroke-dasharray='6 4'/>
+<text x='58.0' y='128.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#e7ebe7'>0.5 M</text>
+<text x='40.0' y='92.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Notification or await: one or two steps per event (estimate)</text>
+<rect x='40' y='172' width='61.5' height='44' rx='4' fill='#4d95ea'/>
+<text x='113.5' y='200.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#e7ebe7'>10–15 M</text>
+<text x='40.0' y='164.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Goal mode with clock.sleep, gpt-6-astra: 55 to 100 steps per hour, two sessions (measured)</text>
+<rect x='40' y='244' width='81.6' height='44' rx='4' fill='#4d95ea'/>
+<text x='133.6' y='272.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#e7ebe7'>19.9 M</text>
+<text x='40.0' y='236.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Shell polling, session B: 43 steps per hour</text>
+<rect x='40' y='316' width='341.9' height='44' rx='4' fill='#4d95ea'/>
+<text x='393.9' y='344.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#e7ebe7'>83.4 M</text>
+<text x='40.0' y='308.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Shell polling, session A: 271 steps per hour</text>
+<rect x='40' y='388' width='770.8' height='44' rx='4' fill='#4d95ea'/>
+<text x='822.8' y='416.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='18' font-weight='600' fill='#e7ebe7'>188 M</text>
+<text x='40.0' y='380.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#bbc4bc'>Goal loop without sleep, the fateful session: 590 steps per hour</text>
+</svg>
