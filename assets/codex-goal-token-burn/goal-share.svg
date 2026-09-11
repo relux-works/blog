@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="210" viewBox="0 0 1000 210" role="img" aria-label="Доля goal-сессий в токенах">
 <rect width="1000" height="210" fill="#fcfcfb"/>
-<text x='40' y='36' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>358 сессий, 15.8 млрд входных токенов</text>
-<text x='40' y='60' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' fill='#52514e'>Семь сессий с включённым goal-режимом против остальных 351.</text>
-<rect x='40' y='90' width='645.3' height='48' rx='4' fill='#eb6834'/>
-<rect x='687.3' y='90' width='272.7' height='48' rx='4' fill='#2a78d6'/>
-<text x='40' y='166' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' fill='#0b0b0b'>7 goal-сессий: 11.1 млрд, 71%</text>
-<text x='960' y='166' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' fill='#0b0b0b'>351 остальных: 4.6 млрд, 29%</text>
+<text x='40.0' y='36.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='20' font-weight='600' fill='#0b0b0b'>3808 роллаутов, 59.2 млрд входных токенов</text>
+<text x='40.0' y='60.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#52514e'>52 сессии с включённым goal-режимом против остальных 3756.</text>
+<rect x='40' y='90' width='453.8' height='48' rx='4' fill='#eb6834'/>
+<rect x='495.8' y='90' width='464.2' height='48' rx='4' fill='#2a78d6'/>
+<text x='40.0' y='166.0' text-anchor='start' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#0b0b0b'>52 goal-сессии: 29.2 млрд, 49%</text>
+<text x='960.0' y='166.0' text-anchor='end' font-family='-apple-system, Helvetica Neue, Arial, sans-serif' font-size='14' font-weight='normal' fill='#0b0b0b'>3756 остальных: 29.9 млрд, 51%</text>
 </svg>
