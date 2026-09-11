@@ -24,6 +24,14 @@ aiSystems:
   - "Claude Fable 5.1"
 ---
 
+This is the story of how we found an input-token leak in models running
+inside Codex. The leak is still there, and because of it crowds of people on
+X keep wondering why a $200 weekly subscription limit is gone in a day. As
+often happens in programming, the spark was a small bug around integers and
+floats, but that is only the spark and a small part of it; the real story is
+more interesting. Reading it with full understanding takes about 30
+minutes.
+
 ## TL;DR
 
 - Our Codex orchestrator was waiting for its child agents. The model was
