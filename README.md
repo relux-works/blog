@@ -24,6 +24,18 @@ hidden from the public. Remove the `draft` flag (or set it to `false`) to publis
    touched the file, `dateModified` from the **last commit**. Each rendered post links
    to its commit on GitHub, so anyone can verify when it was published.
 
+## Tools
+
+- **Git** stores post content and publication history. Add or update files under
+  `posts/`, commit them, and push the reviewed branch. No generated artifacts are
+  written locally.
+- **GitHub Actions** runs `.github/workflows/publish.yml` after a `posts/**` change
+  reaches `main`. Inspect a publication run with `gh run list --workflow publish.yml`;
+  logs remain in GitHub Actions.
+- **Cloudflare Deploy Hooks** rebuild the public site. The GitHub workflow calls the
+  configured hook automatically; rendered posts appear at
+  `https://relux.works/<lang>/blog/<slug>/`.
+
 ## Provenance model
 
 - Git history in this public repo gives traceable, third-party-visible publication

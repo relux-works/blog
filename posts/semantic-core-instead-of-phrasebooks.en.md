@@ -1,6 +1,6 @@
 ---
 title: "A Semantic Core Instead of a Phrasebook"
-description: "How Pohuy and Caveman replaced prompt repetition with tested semantic invariants, reduced runtime context, and kept the limits of their evidence explicit."
+description: "What a rejected Caveman prompt rewrite taught us about keeping stable test taxonomy outside runtime context, annotating cases at evaluation time, and validating evidence before reporting it."
 slug: "semantic-core-instead-of-phrasebooks"
 lang: "en"
 authors:
@@ -8,135 +8,199 @@ authors:
     title: "CTO / Founding Engineer, Relux Works"
     links:
       - "https://www.linkedin.com/in/alexis-grigoryev-22bab159/"
+  - name: "Ivan Oparin"
+    title: "CEO / Founding Engineer, Relux Works"
+    links:
+      - "https://github.com/ivanopcode"
+      - "https://www.linkedin.com/in/ivanoparin/"
 aiSystems:
   - "OpenAI Codex"
 ---
 
-Style skills for LLMs often begin with a harmless list of examples. Then come a glossary, scenarios, exceptions, and several more examples for every intensity level. Eventually, the model receives tens of kilobytes of text before it ever sees the user's task.
+Style skills for language models have two different audiences. The model needs a
+small set of behavioral rules on every invocation. Engineers need identifiers,
+coverage matrices, fixtures, reports, and historical comparisons. Mixing those
+audiences makes the runtime prompt pay for the test system.
 
-We encountered this in two open-source projects: the Russian profane chat mode [Pohuy](https://github.com/relux-works/pohuy) and the ultra-concise response mode [Caveman](https://github.com/JuliusBrussee/caveman). The scale of the problem differed, but the solution was the same: separate semantic invariants from a collection of ready-made phrases, lock those invariants down with tests, and only then reduce the runtime prompt.
+We learned this boundary through an unsuccessful contribution. Our original
+[Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944) combined a
+31% rewrite of the runtime skill with a semantic contract, model runs, reports,
+generated mirrors, and raw snapshots. The maintainer
+[closed it with a precise objection](https://github.com/JuliusBrussee/caveman/pull/944#issuecomment-5510147754):
+the skill body is the product, the rewrite needed the maintainer's own eval loop,
+and identifiers such as `CAV-SEM-07` in runtime headings would reach the model in
+every session as pure overhead.
 
-## What Counts as a Semantic Core
+That review was correct. Stable IDs were useful, and we had put them on the wrong
+side of the interface.
 
-A semantic core is not a shorter summary of the old prompt or a new list of "correct" phrases. It is the smallest set of rules that defines behavior independently of the wording of any particular response.
+An earlier version of this article described the candidate reductions from #944
+as a delivered Caveman result. They were measurements of an unmerged branch. This
+revision corrects the record and documents the smaller design that followed.
 
-For a style skill, the core usually answers five questions:
+## Runtime rules and evaluation metadata are different planes
 
-1. When is the mode activated and deactivated?
-2. Which properties of the response change?
-3. Which facts, constraints, and exact literals must never be lost?
-4. In which situations must style yield to clarity and safety?
-5. Which artifacts must not inherit the conversational style at all?
+A semantic core defines behavior that the model must apply:
 
-Examples are useful for calibration, but they are poor contracts. They anchor the model to wording from the example, inflate context, and prove nothing about behavior on new tasks. One or two calibration examples are enough at runtime; complete scenarios belong in an eval suite.
+- compress form while preserving technical substance;
+- preserve negation, limits, numbers, units, code, identifiers, APIs, commands,
+  and quoted errors;
+- retain the user's language and grammatical role markers;
+- keep public and persisted artifacts in normal prose;
+- suspend the compressed style when safety or an ordered recovery procedure
+  requires full clarity.
 
-Deterministic command phrase maps form a separate layer. Commands such as `/caveman ultra` and `stop caveman` should be parsed by ordinary code and tested as exact state transitions. They are neither a generative phrasebook nor part of the model's style calibration.
+These rules belong in runtime context because they can affect the answer.
 
-## Pohuy: From a Mandatory Phrasebook to a Compact Contract
+Evaluation metadata serves a different purpose. A stable identifier lets a report
+track one invariant across renamed cases, reordered fixtures, and skill revisions.
+It supports joins, coverage matrices, trends, and failure clustering. The model
+does not need to see the identifier to follow the rule.
 
-The original Pohuy runtime required loading the main `SKILL.md` plus three reference documents: a glossary, a scenario catalog, and an ontology. In the historical snapshot used for the A/B evaluation, this amounted to 42,603 bytes and 477 lines of mandatory instructions.
+The practical boundary is simple:
 
-The compact version reduced the runtime to 2,694 bytes and 57 lines. Instead of a phrasebook, it defines:
+| Concern | Source form | Enters runtime prompt? |
+| --- | --- | --- |
+| Behavioral rule | Clear natural language | Yes |
+| Calibration example | Minimal representative example | Sometimes |
+| Stable contract ID | Eval taxonomy entry | No |
+| Case-to-invariant mapping | Readable taxonomy keys | No |
+| Coverage matrix and report | Generated eval output | No |
 
-- explicit opt-in only, with no activation from incidental profanity or frustration;
-- three intensity levels;
-- the semantic role of profanity: status, severity, or surprise rather than decoration on a schedule;
-- normal professional language for code, documentation, and public artifacts;
-- complete, clear prose for safety, data loss, and irreversible actions;
-- one calibration example.
+## Assign IDs when an evaluation starts
 
-Mandatory instructions shrank by 39,909 bytes, or 93.68%. This compares the skill-only runtime bytes, not the full system prompt.
+The focused replacement in
+[Caveman PR #1061](https://github.com/JuliusBrussee/caveman/pull/1061)
+keeps the stable ID in an eval-only taxonomy:
 
-A paired historical run on July 31, 2026 produced these results:
+```json
+{
+  "id": "CAV-SEM-02",
+  "key": "exact-preservation",
+  "description": "Preserve polarity, limits, numbers, units, code, identifiers, APIs, commands, and quoted errors."
+}
+```
 
-| Metric | Old runtime | Semantic core | Change |
-| --- | ---: | ---: | ---: |
-| Mandatory instructions | 42,603 B | 2,694 B | -93.68% |
-| Prompt-cache creation | 14,625 tokens | 4,059 tokens | -72.25% |
-| Model output | 1,334 tokens | 284 tokens | -78.71% |
-| Run cost | $0.1146277 | $0.0354977 | -69.03% |
-| Blind semantic score | 21.2/25 | 24.2/25 | +3.0 |
+Source cases use the readable key:
 
-Claude Sonnet 5 generated the responses, and `gpt-5.6-sol` performed the blind evaluation. The rubric covered factual accuracy, required actions, tone, severity calibration, and safety. The old response invented a clean Git worktree and permission to push, and it misstated the possible data-loss interval. The compact response received no material factual errors.
+```json
+{
+  "id": "polarity-and-limits",
+  "taxonomy": ["exact-preservation"],
+  "prompt": "Restate this retry policy without changing meaning: Do not retry more than 3 times. Retry only after 250 ms, except for HTTP 429."
+}
+```
 
-These numbers apply only to that preserved historical run. The current repository contains the rubric and scenarios, but it does not yet include a fully reproducible model runner with immutable raw snapshots. The result therefore cannot be generalized automatically to a new model or a future revision of the skill.
+An annotation step resolves that key when it prepares evaluation output:
 
-## Caveman: A Smaller Problem, the Same Risk
+```json
+{
+  "id": "polarity-and-limits",
+  "taxonomy": ["exact-preservation"],
+  "contract_ids": ["CAV-SEM-02"],
+  "prompt": "Restate this retry policy without changing meaning: Do not retry more than 3 times. Retry only after 250 ms, except for HTTP 429."
+}
+```
 
-Caveman already had a better structure: it loaded no separate glossaries and used one canonical `SKILL.md`. Even so, the default `full` mode sent 4,670 bytes through SessionStart, approximately 1,168 tokens by the rough `bytes / 4` proxy. The raw skill occupied 6,518 bytes.
+This gives reports stable machine identifiers while the runtime `SKILL.md` contains
+none of them. The test suite checks that boundary directly.
 
-Absolute size was not the main problem. The runtime mixed several different concerns in one document:
+The resolver also fails on duplicate taxonomy IDs, duplicate case IDs, unknown
+keys, repeated keys, malformed entries, and source cases that embed contract IDs.
+These checks matter because a misspelled key should stop a run. Silently dropping
+the mapping would produce a clean report with a hidden coverage hole.
 
-- semantic prohibitions, such as never dropping `not`, numbers, or exact errors;
-- tool-use and language-selection rules;
-- a table of six intensity levels;
-- two complete sets of technical examples;
-- a separate irreversible-operation example;
-- repeated wording that the intensity table already expressed.
+## A taxonomy is useful when it reveals structure
 
-Existing evals measured response length, but they did not explicitly measure factual accuracy, cross-model stability, or preservation of semantic constraints. A comment in the hook code justified the large prompt as protection against drift after compaction, so deleting examples without a new gate would have been unsafe.
+Numbering requirements adds little by itself. The taxonomy becomes useful when
+cases can map to several invariants and engineers can inspect the resulting matrix.
 
-We first extracted the invariants:
+For example, a Portuguese migration prompt can cover both
+`language-and-grammar` and `exact-preservation`. A public security PR description
+can cover `artifact-boundary` and `safety-clarity`. Looking at cases only gives a
+list of prompts. Looking at the case-to-invariant matrix reveals which properties
+have positive controls, negative controls, overlapping coverage, or no evidence.
 
-- compress form only, never technical content;
-- preserve negations, constraints, numbers, units, code, APIs, commands, and exact errors;
-- never add words merely to simulate broken speech;
-- preserve the user's language and grammatical markers;
-- remove tool narration except for warnings and necessary clarification;
-- write code, documentation, commits, issues, and other external artifacts in normal language;
-- use classical Chinese forms only in `wenyan` modes;
-- temporarily suspend the compressed style when it would undermine safety or an unambiguous sequence of actions.
+Stable IDs make comparisons durable across revisions. Readable keys keep fixtures
+reviewable. The annotation step connects the two representations at the point where
+the extra metadata becomes useful.
 
-Each invariant then received a stable identifier and a negative mutant test. The runtime byte budget became part of the same contract. This gate does not prove model-output quality, but it prevents a protective rule from being removed accidentally for the sake of an attractive benchmark number.
+## Complete evidence before attractive metrics
 
-The implementation and reproducible artifacts are published in [Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944).
+Taxonomy integrity does not prove that a run is complete. The original #944 review
+also found that partial evidence could pass a structural gate. We separated that
+problem into
+[Caveman PR #1062](https://github.com/JuliusBrussee/caveman/pull/1062).
 
-After compaction, the canonical skill occupies 4,494 bytes instead of 6,518 bytes, a reduction of 31.05%. The real default `full` payload delivered to Claude Code through SessionStart fell from 4,670 to 3,455 bytes, a reduction of 26.02%. The OpenClaw bootstrap fell from 7,241 to 5,217 bytes, a reduction of 27.95%. These are exact UTF-8 byte counts. The `bytes / 4` figures are only rough input-size proxies and are not presented as token counts for a particular model.
+The validator runs before the existing token report and requires:
 
-A paired evaluation on `claude-haiku-4-5` ran the old and compact skills against identical cases. The deterministic judge marked the compact version as `pass` where the baseline lost the exact spellings `250 ms` and `"ECONNRESET"`. Both versions lost some explicit constraints in a separate case involving `not`, `only`, and `except`; this remains a known limitation rather than a concealed success. Cases requiring human semantic judgment remain `unknown` and are never counted as passes. A single run on one model does not prove equivalence and cannot be generalized automatically to other models.
+- snapshot metadata and a non-empty prompt list;
+- both comparison controls;
+- at least one skill arm;
+- exactly one output per prompt in every arm;
+- raw string outputs;
+- an `n_prompts` value equal to the actual prompt count.
 
-## Why Mutation Testing Matters
+The tests include the committed snapshot as a positive control, then remove a
+control, truncate an arm, replace a raw output with an object, change
+`n_prompts`, remove every skill arm, and corrupt the JSON. A checker is useful only
+after a known violation demonstrates that it can fail for the intended reason.
 
-A check that says "the file exists, the JSON is valid, and the current prompt passes" proves very little. A useful contract test must damage the production source and confirm that the checker rejects it.
+## Isolate the generator from the operator
 
-For Pohuy, we separately tested:
+Even a complete matrix can measure the wrong thing when the runner inherits local
+agent customization. The old Claude invocation inherited user and project settings
+plus MCP configuration. Two engineers could run the same checked-in fixtures and
+silently give the model different instructions or tools.
 
-- changing the mandatory reference-load limit from `0` to `1`;
-- adding a glossary reference to the runtime;
-- exceeding the byte and line budgets;
-- removing the explicit opt-in guard;
-- creating overlap between positive and negative activation fixtures;
-- weakening the safety threshold;
-- removing the clear boundary for destructive and data-loss scenarios;
-- running the same negative cases under `PYTHONOPTIMIZE=1`, ensuring that Python `assert` removal cannot disable the checks.
+[Caveman PR #1063](https://github.com/JuliusBrussee/caveman/pull/1063)
+adds `--setting-sources ""` and `--strict-mcp-config`, following an isolation
+pattern already used by `caveman-compress`. Unit tests verify the exact user prompt,
+system prompt, model, and isolation arguments without calling a model.
 
-For Caveman, the same approach binds every invariant to the production payload and every level filtered by the hook. The real SessionStart output is measured separately rather than inferring runtime size from the source file alone.
+Taxonomy, matrix validation, and runner isolation are separate contracts. Each can
+be reviewed and merged independently. This is why the replacement is three small
+PRs instead of another combined harness and prompt rewrite.
 
-## A Practical Process
+## Pohuy shows the runtime side of the boundary
 
-A reliable sequence looks like this:
+The same separation applies to phrasebooks. The open
+[Pohuy PR #21](https://github.com/smixs/pohuy/pull/21) proposes a 2,694-byte,
+57-line runtime skill with zero mandatory reference loads. It keeps explicit
+activation, three intensity levels, tone semantics, artifact boundaries, and clear
+safety behavior. Glossaries and scenario collections remain optional material.
 
-1. Capture the exact production payload for every installation and activation path.
-2. Separate rules into semantic invariants, calibration examples, and optional references.
-3. Move scenarios out of runtime and into eval fixtures.
-4. Add negative mutant tests for every critical invariant.
-5. Set byte and line budgets.
-6. Compact only the canonical source, then regenerate mirrors and archives.
-7. Run structural gates, model evals, and an independent blind review.
-8. Publish numbers together with the model, date, prompt boundaries, and measurement limitations.
+Those are exact file and contract measurements, not a universal token or quality
+claim. The PR's deterministic harness mutation-tests the byte and line budgets,
+activation boundaries, default level, reference loading, eval schema, and safety
+thresholds. Model behavior still requires separate evaluation.
 
-The order matters. Starting with text deletion makes it easy to mistake stylistic similarity for semantic equivalence. Starting with a huge model benchmark can waste money evaluating a contract that has not yet been defined.
+## What the current evidence supports
 
-## What Is Not Part of the Solution
+The three Caveman follow-ups are open contributions as of this revision. They prove
+that the proposed taxonomy mapping, fail-closed matrix validation, and isolated
+command construction execute under their tests. They do not prove semantic
+equivalence across models. They do not establish that the rejected runtime rewrite
+should be merged. They make no claim about token savings from the identifiers
+themselves.
 
-A semantic core should not depend on a private runtime, a shared agent manager, or the author's internal infrastructure. Such dependencies complicate external review and conflate the product idea with one local installation method.
+The narrow claim is stronger because it is testable: traceability metadata can be
+added during evaluation, used in reports, and mechanically excluded from the
+runtime prompt.
 
-In Pohuy, we removed the `relux-agents-infra` coupling from setup, documentation, and contract tests. Native installation paths, the product-owned skill, evals, and checks remain. Caveman never added such a dependency. Both optimizations can be discussed and reproduced as standalone techniques for managing LLM context.
+## A practical sequence
 
-## Conclusion
+1. Write behavioral invariants in plain language.
+2. Keep only rules that affect model behavior in runtime context.
+3. Give each invariant a stable ID and readable key in an eval-only manifest.
+4. Label cases with readable keys.
+5. Resolve stable IDs when preparing a run or report.
+6. Reject unknown keys, duplicates, malformed cases, and incomplete evidence.
+7. Isolate model runners from user settings, project settings, and inherited tools.
+8. Mutation-test every gate with a known violation.
+9. Report model, inputs, repetitions, controls, limitations, and unresolved cases.
 
-A large phrasebook creates an illusion of control, often purchased through expensive repetition while hiding the absence of a real contract. A semantic core makes behavior explicit: what may change, what must never be lost, and when style must yield.
-
-Pohuy demonstrated the extreme case: a 93.68% runtime reduction accompanied by a better result in one preserved blind A/B evaluation. Caveman demonstrated a more typical case: a moderately large prompt where the main value of optimization came not only from fewer bytes, but from a testable boundary between style and meaning.
-
-The best short prompt is the one with less text and more verifiable guarantees.
+Prompt optimization and evaluation design share one engineering principle: put
+information at the boundary where it is consumed. Behavioral instructions belong
+with the model. Taxonomy and traceability belong with the test system. Keeping that
+boundary explicit saves context and produces evidence that is easier to trust.
