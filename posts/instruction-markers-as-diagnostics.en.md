@@ -15,18 +15,28 @@ authors:
       - "https://www.linkedin.com/in/ivanoparin/"
 aiSystems:
   - "OpenAI Codex"
+  - "Claude Opus 5"
 ---
 
-Our [previous article](https://relux.works/en/blog/semantic-core-instead-of-phrasebooks/)
-placed stable taxonomy IDs outside production prompts. That boundary still holds.
-The runtime instructions used by a product remain ordinary, untagged text.
+In the first version of this experiment, a model returned an answer and then
+separately quoted the spans of that answer it claimed to have derived from specific
+instructions. Two of those quoted spans did not exist in the answer. Exact checking
+caught both, but the response shape had allowed a claim about text that was never
+returned. The second version of the experiment, and the limits on what it can
+show, follow from that defect.
 
-The next experiment asks a deliberately different question: can temporary markers
-make an evaluation easier to inspect? A disposable copy of the instructions receives
-IDs, and the model sees those IDs only inside a tagged experimental arm. A matched
-clean arm uses the same response envelope without markers or links. The marker and
-the envelope can themselves alter behavior, so this pairing is part of the design,
-and serves as an integral experimental control.
+The question this article answers is narrow: can temporary markers on a disposable
+copy of the instructions make an evaluation easier to inspect, and what does the
+resulting evidence support? Our [previous article](https://relux.works/en/blog/semantic-core-instead-of-phrasebooks/)
+placed stable taxonomy IDs outside production prompts. That boundary still holds.
+The runtime instructions used by a product remain ordinary, untagged text, and
+everything described here happens inside evaluation fixtures.
+
+The design is a matched pair. A disposable copy of the instructions receives IDs,
+and the model sees those IDs only inside a tagged experimental arm. A matched clean
+arm uses the same response envelope without markers or links. The marker and the
+envelope can themselves alter behavior, so this pairing is part of the design and
+serves as an integral experimental control.
 
 The result is a [bounded diagnostic prototype](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/evals/instruction_diagnostics.md).
 It creates inspectable claims between answer segments and supplied instructions. It
@@ -36,9 +46,10 @@ does not reveal chain of thought or prove which instruction caused an answer.
 
 A stable test taxonomy names requirements across revisions. An experimental marker
 is an intervention inserted into one frozen evaluation fixture and exposed to the
-model. They may share an identifier scheme, but their operational roles differ.
+model. They may share an identifier scheme, but their operational roles differ, and
+the rest of this article is about the marker.
 
-This distinction generalizes beyond a word-replacement matrix. Candidate units can
+The marker method generalizes beyond a word-replacement matrix. Candidate units can
 be examples, requirements, prose rules, semantic-core units, safety instructions,
 or boundary rules. These are possible units for the method. The study has not tested
 every domain in that list.
@@ -59,13 +70,16 @@ their provenance without turning either fixture into a production skill.
 V1 requested an answer plus separately quoted spans and rule IDs. Its 80 completed
 calls emitted 14 claims. Two semantic claims quoted source text that never appeared
 in the answer. Exact checking caught the defect, but the response shape allowed it.
-The [v1 report](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/docs/v1-report.md)
+Under that shape, nothing stopped a response from citing a span such as
+`17 × 19 = 323` (borrowed from the v2 cases for illustration) as derived from a
+rule while the returned answer contained no such string. The [v1 report](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/docs/v1-report.md)
 therefore treated the result as promising and inconclusive.
 
 V2 made the answer a concatenation of returned segments. Each segment carries its
 own links, and an empty link list is legitimate. A link is now structurally attached
-to text that actually exists. This makes the relationship addressable. Its semantic
-truth still requires a separate judgment.
+to text that actually exists: the segment holding `17 × 19 = 323` either carries a
+link or it does not, and there is no separate quote to drift. This makes the
+relationship addressable. Its semantic truth still requires a separate judgment.
 
 | Study | Scheduled responses | Design | Observable result |
 | --- | ---: | --- | --- |
@@ -73,13 +87,14 @@ truth still requires a separate judgment.
 | V2 | 120 | 2 pinned models, 5 arms, 6 cases, 2 repetitions | 27 emitted links attached to returned segments |
 
 The five v2 arms were terse control, current-original clean and tagged, and
-historical-semantic clean and tagged. The current original and historical candidate
-are different versions and contracts. Their differences mix version, wording,
-granularity, and instrumentation. They cannot establish word-matrix versus
-semantic-core superiority. Clean and tagged arms also share a segmented envelope,
-so their comparison estimates incremental marker and link overhead within that
-protocol. Total overhead against an unstructured production answer remains outside
-this comparison. The full
+historical-semantic clean and tagged. This arm set limits what the numbers can
+say. The current original and historical candidate are different versions and
+contracts. Their differences mix version, wording, granularity, and
+instrumentation, so they cannot establish word-matrix versus semantic-core
+superiority. Clean and tagged arms also share a segmented envelope, so their
+comparison estimates incremental marker and link overhead within that protocol.
+Total overhead against an unstructured production answer remains outside this
+comparison. The full
 [v2 report](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/docs/v2-report.md)
 records these limits.
 
@@ -94,7 +109,8 @@ V2 separates checks that are easy to blur together:
 3. Independent semantic review inspects the segment, full source fragment, and task
    context, preserving compatible, contradicted, and insufficient-evidence labels.
 
-Across 27 emitted links, an independent MODEL review judged 18 compatible, 7
+The third layer is a model judgment, and its output is a set of counts rather than
+a rate. Across 27 emitted links, an independent MODEL review judged 18 compatible, 7
 contradicted, and 2 insufficient. It also identified 17 observable omissions. These
 denominators matter. The 18 compatible links are not "18/27 accuracy" or precision.
 The 17 omissions are not causal false negatives, and they are unrelated to the
@@ -105,12 +121,14 @@ labeled, so live precision and recall remain undefined. The frozen
 and [independent review](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/artifacts/v2/independent-link-review.json)
 preserve those distinctions.
 
-Consider the arithmetic answer `17 × 19 = 323`. One tagged response linked it to a
-broad rule about preserving exact technical substance. The independent model review
-called that relationship compatible because the required string was preserved. The
-same review noted that the match was generic and non-discriminative. Correct
-arithmetic plus a compatible broad rule does not show that the source rule influenced
-the answer. An empty link list for the same answer was also a valid abstention.
+The arithmetic answer `17 × 19 = 323` shows what a compatible label does and does
+not mean. One tagged response linked it to a broad rule about preserving exact
+technical substance. The independent model review called that relationship
+compatible because the required string was preserved. The same review noted that
+the match was generic and non-discriminative. Correct arithmetic plus a compatible
+broad rule does not show that the source rule influenced the answer. An empty link
+list for the same answer was also a valid abstention, which is why the format keeps
+abstention legitimate.
 
 ## Calibrate the checker against declared facts
 
@@ -133,7 +151,7 @@ reversible eval fixtures, structurally attached links, explicit abstention, sepa
 answer checks, and reviewable disagreement. It does not support claims of causal
 provenance, chain-of-thought access, a benchmark win, pure compression superiority,
 or global validation. Two models and two repetitions leave substantial uncertainty,
-and broad matching can be non-discriminative.
+and broad matching can be non-discriminative, as the arithmetic link showed.
 
 The proposed next step is [synthetic robustness work](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/docs/roadmap/synthetic-robustness-proposal.md),
 which has not been executed. It would script decidable examples, use review-assisted
@@ -160,6 +178,10 @@ success promise.
 The [public repository README](https://github.com/relux-works/taxonomy-research/blob/aae4e2af69d9f71de1b19fcf3fbe6591ea0003ea/README.md)
 contains the current offline reproduction commands. Its 48 tests are deterministic
 software controls. Counting them as 48 independent experimental confirmations would
-be incorrect. That
-modest distinction is the core of the method: make claims easier to inspect without
-making them larger than the evidence.
+be incorrect.
+
+The practical consequence is a rule for reporting. Keep markers in disposable eval
+copies, publish every count with its denominator, and treat a compatible link as
+evidence that a relationship is inspectable rather than evidence that it is causal.
+That modest distinction is the core of the method: make claims easier to inspect
+without making them larger than the evidence.

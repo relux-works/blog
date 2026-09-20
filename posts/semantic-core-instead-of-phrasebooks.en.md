@@ -15,24 +15,30 @@ authors:
       - "https://www.linkedin.com/in/ivanoparin/"
 aiSystems:
   - "OpenAI Codex"
+  - "Claude Opus 5"
 ---
 
-Style skills for language models have two different audiences. The model needs a
-small set of behavioral rules on every invocation. Engineers need identifiers,
-coverage matrices, fixtures, reports, and historical comparisons. Mixing those
-audiences makes the runtime prompt pay for the test system.
-
-We learned this boundary through an unsuccessful contribution. Our original
-[Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944) combined a
-31% rewrite of the runtime skill with a semantic contract, model runs, reports,
-generated mirrors, and raw snapshots. The maintainer
-[closed it with a precise objection](https://github.com/JuliusBrussee/caveman/pull/944#issuecomment-5510147754):
+The maintainer of Caveman
+[closed our pull request with a precise objection](https://github.com/JuliusBrussee/caveman/pull/944#issuecomment-5510147754):
 the skill body is the product, the rewrite needed the maintainer's own eval loop,
 and identifiers such as `CAV-SEM-07` in runtime headings would reach the model in
-every session as pure overhead.
+every session as pure overhead. The original
+[Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944) had combined a
+31% rewrite of the runtime skill with a semantic contract, model runs, reports,
+generated mirrors, and raw snapshots. That review was correct. Stable IDs were
+useful, and we had put them on the wrong side of the interface.
 
-That review was correct. Stable IDs were useful, and we had put them on the wrong
-side of the interface.
+The mistake has a general shape. Style skills for language models have two
+different audiences. The model needs a small set of behavioral rules on every
+invocation. Engineers need identifiers, coverage matrices, fixtures, reports, and
+historical comparisons. Mixing those audiences makes the runtime prompt pay for the
+test system.
+
+This article answers one question: where should the stable identifiers of a test
+taxonomy live so that reports can use them while the runtime prompt never carries
+them? It covers the three small Caveman follow-ups that replaced #944 and one
+runtime-side example from Pohuy. It does not evaluate model behavior under any of
+these skills.
 
 An earlier version of this article described the candidate reductions from #944
 as a delivered Caveman result. They were measurements of an unmerged branch. This
@@ -69,9 +75,13 @@ The practical boundary is simple:
 
 ## Assign IDs when an evaluation starts
 
-The focused replacement in
+The rest of the Caveman example follows one invariant, exact preservation, from
+its taxonomy entry through a source case to an annotated report row. The focused
+replacement in
 [Caveman PR #1061](https://github.com/JuliusBrussee/caveman/pull/1061)
-keeps the stable ID in an eval-only taxonomy:
+keeps the stable ID in an eval-only taxonomy. Within this design the taxonomy
+entry is the only place where `CAV-SEM-02` is written by hand; cases and the
+runtime skill are checked for its absence:
 
 ```json
 {
@@ -81,7 +91,8 @@ keeps the stable ID in an eval-only taxonomy:
 }
 ```
 
-Source cases use the readable key:
+A source case refers to that invariant by its readable key and never by its ID, so
+a fixture can be reviewed without a lookup table:
 
 ```json
 {
@@ -91,7 +102,8 @@ Source cases use the readable key:
 }
 ```
 
-An annotation step resolves that key when it prepares evaluation output:
+When a run or report is prepared, an annotation step resolves the key. The
+expected output is the same case with one added field:
 
 ```json
 {
@@ -102,28 +114,27 @@ An annotation step resolves that key when it prepares evaluation output:
 }
 ```
 
-This gives reports stable machine identifiers while the runtime `SKILL.md` contains
-none of them. The test suite checks that boundary directly.
+The only thing that changed between the second and third sample is
+`contract_ids`, and it appeared at evaluation time. This gives reports stable
+machine identifiers while the runtime `SKILL.md` contains none of them. The test
+suite checks that boundary directly.
 
-The resolver also fails on duplicate taxonomy IDs, duplicate case IDs, unknown
-keys, repeated keys, malformed entries, and source cases that embed contract IDs.
-These checks matter because a misspelled key should stop a run. Silently dropping
-the mapping would produce a clean report with a hidden coverage hole.
-
-## A taxonomy is useful when it reveals structure
+The edge cases are where the resolver earns its place. It fails on duplicate
+taxonomy IDs, duplicate case IDs, unknown keys, repeated keys, malformed entries,
+and source cases that embed contract IDs. These checks matter because a misspelled
+key should stop a run. Silently dropping the mapping would produce a clean report
+with a hidden coverage hole.
 
 Numbering requirements adds little by itself. The taxonomy becomes useful when
 cases can map to several invariants and engineers can inspect the resulting matrix.
-
-For example, a Portuguese migration prompt can cover both
-`language-and-grammar` and `exact-preservation`. A public security PR description
-can cover `artifact-boundary` and `safety-clarity`. Looking at cases only gives a
-list of prompts. Looking at the case-to-invariant matrix reveals which properties
-have positive controls, negative controls, overlapping coverage, or no evidence.
-
+A Portuguese migration prompt can cover both `language-and-grammar` and
+`exact-preservation`. A public security PR description can cover
+`artifact-boundary` and `safety-clarity`. Looking at cases only gives a list of
+prompts. Looking at the case-to-invariant matrix reveals which properties have
+positive controls, negative controls, overlapping coverage, or no evidence.
 Stable IDs make comparisons durable across revisions. Readable keys keep fixtures
-reviewable. The annotation step connects the two representations at the point where
-the extra metadata becomes useful.
+reviewable. The annotation step connects the two representations at the point
+where the extra metadata becomes useful.
 
 ## Complete evidence before attractive metrics
 
@@ -141,8 +152,9 @@ The validator runs before the existing token report and requires:
 - raw string outputs;
 - an `n_prompts` value equal to the actual prompt count.
 
-The tests include the committed snapshot as a positive control, then remove a
-control, truncate an arm, replace a raw output with an object, change
+The evidence for this validator is a set of tests, and the tests are what make the
+gate believable. They include the committed snapshot as a positive control, then
+remove a control, truncate an arm, replace a raw output with an object, change
 `n_prompts`, remove every skill arm, and corrupt the JSON. A checker is useful only
 after a known violation demonstrates that it can fail for the intended reason.
 
@@ -164,6 +176,8 @@ PRs instead of another combined harness and prompt rewrite.
 
 ## Pohuy shows the runtime side of the boundary
 
+Pohuy is a separate sample rather than a continuation of the Caveman example,
+because it shows what stays on the runtime side once the metadata has moved out.
 The same separation applies to phrasebooks. The open
 [Pohuy PR #21](https://github.com/smixs/pohuy/pull/21) proposes a 2,694-byte,
 57-line runtime skill with zero mandatory reference loads. It keeps explicit
@@ -202,5 +216,7 @@ runtime prompt.
 
 Prompt optimization and evaluation design share one engineering principle: put
 information at the boundary where it is consumed. Behavioral instructions belong
-with the model. Taxonomy and traceability belong with the test system. Keeping that
-boundary explicit saves context and produces evidence that is easier to trust.
+with the model. Taxonomy and traceability belong with the test system. The
+decision that follows is concrete: a contract ID found in a runtime file is a leak
+from the test system, and the fix is moving it into the eval manifest. Keeping
+that boundary explicit saves context and produces evidence that is easier to trust.

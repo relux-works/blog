@@ -15,24 +15,30 @@ authors:
       - "https://www.linkedin.com/in/ivanoparin/"
 aiSystems:
   - "OpenAI Codex"
+  - "Claude Opus 5"
 ---
 
-У стилевого skill для языковой модели есть две разные аудитории. Модели при каждом
-вызове нужен небольшой набор поведенческих правил. Инженерам нужны идентификаторы,
-матрицы покрытия, fixtures, отчёты и сравнения между ревизиями. Если смешать эти
-аудитории, runtime-промпт начинает платить за тестовую систему.
-
-Мы увидели эту границу на неудачном contribution. Исходный
-[Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944) объединял
-31-процентный rewrite runtime skill, семантический контракт, model runs, отчёты,
-generated mirrors и raw snapshots. Maintainer
-[закрыл его с точным замечанием](https://github.com/JuliusBrussee/caveman/pull/944#issuecomment-5510147754):
+Мейнтейнер Caveman
+[закрыл наш pull request с точным замечанием](https://github.com/JuliusBrussee/caveman/pull/944#issuecomment-5510147754):
 тело skill является продуктом, rewrite должен пройти его собственный eval loop,
 а идентификаторы вроде `CAV-SEM-07` в runtime-заголовках будут попадать в модель
-на каждой сессии как чистый overhead.
+на каждой сессии как чистый overhead. Исходный
+[Caveman PR #944](https://github.com/JuliusBrussee/caveman/pull/944) объединял
+31-процентный rewrite runtime skill, семантический контракт, model runs, отчёты,
+generated mirrors и raw snapshots. Замечание было верным. Стабильные ID приносили
+пользу, но находились по неправильную сторону интерфейса.
 
-Замечание было верным. Стабильные ID приносили пользу, но находились по неправильную
-сторону интерфейса.
+У этой ошибки общая форма. У стилевого skill для языковой модели есть две разные
+аудитории. Модели при каждом вызове нужен небольшой набор поведенческих правил.
+Инженерам нужны идентификаторы, матрицы покрытия, fixtures, отчёты и сравнения
+между ревизиями. Если смешать эти аудитории, runtime-промпт начинает платить за
+тестовую систему.
+
+Статья отвечает на один вопрос: где должны жить стабильные идентификаторы test
+taxonomy, чтобы отчёты могли ими пользоваться, а runtime-промпт никогда их не
+нёс? Она описывает три маленьких Caveman follow-up PR, заменивших #944, и один
+пример runtime-стороны из Pohuy. Поведение модели под этими skills здесь не
+оценивается.
 
 Предыдущая версия этой статьи описывала размеры candidate из #944 как результат,
 доставленный в Caveman. Это были измерения unmerged-ветки. Текущая редакция исправляет
@@ -69,9 +75,12 @@ Evaluation metadata решает другую задачу. Стабильный
 
 ## Назначаем ID при запуске evaluation
 
-Узкая замена в
+Дальше пример Caveman следует за одним invariant, exact preservation, от записи в
+taxonomy через source case до аннотированной строки отчёта. Узкая замена в
 [Caveman PR #1061](https://github.com/JuliusBrussee/caveman/pull/1061)
-хранит стабильный ID только в eval taxonomy:
+хранит стабильный ID только в eval taxonomy. В этом дизайне запись taxonomy
+является единственным местом, где `CAV-SEM-02` написан руками; cases и runtime
+skill проверяются на его отсутствие:
 
 ```json
 {
@@ -81,7 +90,8 @@ Evaluation metadata решает другую задачу. Стабильный
 }
 ```
 
-Source cases используют читаемый key:
+Source case ссылается на этот invariant по читаемому key и никогда по ID, поэтому
+fixture можно ревьюить без таблицы соответствий:
 
 ```json
 {
@@ -91,7 +101,8 @@ Source cases используют читаемый key:
 }
 ```
 
-Annotation step разрешает этот key при подготовке evaluation output:
+При подготовке run или отчёта annotation step разрешает этот key. Ожидаемый
+результат представляет собой тот же case с одним добавленным полем:
 
 ```json
 {
@@ -102,28 +113,27 @@ Annotation step разрешает этот key при подготовке eval
 }
 ```
 
-Отчёт получает стабильные машинные идентификаторы, а runtime `SKILL.md` не содержит
-ни одного такого ID. Test suite проверяет эту границу напрямую.
+Между вторым и третьим примером изменилось только поле `contract_ids`, и появилось
+оно на этапе evaluation. Отчёт получает стабильные машинные идентификаторы, а
+runtime `SKILL.md` не содержит ни одного такого ID. Test suite проверяет эту границу
+напрямую.
 
-Resolver также останавливается на duplicate taxonomy ID, duplicate case ID,
-неизвестном key, повторённом key, malformed entry и source case со встроенным
-contract ID. Эти проверки нужны потому, что опечатка в key должна остановить run.
-Молчаливый пропуск mapping создаст чистый отчёт со скрытой дырой в покрытии.
-
-## Taxonomy полезна, когда показывает структуру
+На граничных случаях resolver и оправдывает своё существование. Он останавливается
+на duplicate taxonomy ID, duplicate case ID, неизвестном key, повторённом key,
+malformed entry и source case со встроенным contract ID. Эти проверки нужны потому,
+что опечатка в key должна остановить run. Молчаливый пропуск mapping создаст чистый
+отчёт со скрытой дырой в покрытии.
 
 Одна нумерация требований даёт мало. Taxonomy становится полезной, когда case может
 относиться к нескольким invariants, а инженер видит получившуюся matrix.
-
-Например, португальский prompt про migration покрывает одновременно
-`language-and-grammar` и `exact-preservation`. Публичное описание security PR
-покрывает `artifact-boundary` и `safety-clarity`. Список cases показывает набор
-промптов. Matrix между cases и invariants показывает свойства с positive controls,
-negative controls, пересекающимся покрытием или полным отсутствием evidence.
-
-Стабильные ID делают сравнение долговечным между ревизиями. Читаемые keys оставляют
-fixtures доступными для review. Annotation step соединяет эти представления в момент,
-когда дополнительная metadata становится полезной.
+Португальский prompt про migration покрывает одновременно `language-and-grammar` и
+`exact-preservation`. Публичное описание security PR покрывает `artifact-boundary`
+и `safety-clarity`. Список cases показывает набор промптов. Matrix между cases и
+invariants показывает свойства с positive controls, negative controls,
+пересекающимся покрытием или полным отсутствием evidence. Стабильные ID делают
+сравнение долговечным между ревизиями. Читаемые keys оставляют fixtures доступными
+для review. Annotation step соединяет эти представления в момент, когда
+дополнительная metadata становится полезной.
 
 ## Полная evidence до красивых метрик
 
@@ -140,10 +150,11 @@ Validator запускается до существующего token report и
 - raw outputs типа string;
 - `n_prompts`, равный реальному числу prompts.
 
-В tests committed snapshot служит positive control. Затем test удаляет control,
-обрезает arm, заменяет raw output объектом, меняет `n_prompts`, удаляет все skill
-arms и повреждает JSON. Checker становится доказательством только после того, как
-известное нарушение заставило его упасть по ожидаемой причине.
+Evidence для этого validator является набором tests, и именно tests делают gate
+заслуживающим доверия. В них committed snapshot служит positive control. Затем test
+удаляет control, обрезает arm, заменяет raw output объектом, меняет `n_prompts`,
+удаляет все skill arms и повреждает JSON. Checker становится доказательством только
+после того, как известное нарушение заставило его упасть по ожидаемой причине.
 
 ## Изолируем generator от окружения оператора
 
@@ -163,7 +174,9 @@ Taxonomy, matrix validation и runner isolation являются отдельн�
 
 ## Pohuy показывает runtime-сторону границы
 
-То же разделение применимо к phrasebooks. Открытый
+Pohuy является отдельным примером, а не продолжением примера Caveman: он показывает,
+что остаётся на runtime-стороне после того, как metadata оттуда вынесена. То же
+разделение применимо к phrasebooks. Открытый
 [Pohuy PR #21](https://github.com/smixs/pohuy/pull/21) предлагает runtime skill
 размером 2 694 байта и 57 строк с нулём mandatory reference loads. Он сохраняет
 explicit activation, три уровня интенсивности, tone semantics, artifact boundaries
@@ -201,5 +214,7 @@ command construction. Они не доказывают semantic equivalence ме
 
 У prompt optimization и evaluation design один инженерный принцип: информация должна
 находиться на той границе, где её используют. Behavioral instructions нужны модели.
-Taxonomy и traceability нужны тестовой системе. Явная граница экономит контекст и
-создаёт evidence, которой проще доверять.
+Taxonomy и traceability нужны тестовой системе. Отсюда следует конкретное решение:
+contract ID, найденный в runtime-файле, является утечкой из тестовой системы, и
+исправлением будет перенос его в eval manifest.
+Явная граница экономит контекст и создаёт evidence, которой проще доверять.
