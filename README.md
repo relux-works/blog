@@ -35,6 +35,50 @@ hidden from the public. Remove the `draft` flag (or set it to `false`) to publis
 - **Cloudflare Deploy Hooks** rebuild the public site. The GitHub workflow calls the
   configured hook automatically; rendered posts appear at
   `https://relux.works/<lang>/blog/<slug>/`.
+- **Word-choice gate** (`.scripts/word_choice_gate.py`) checks that the prose of a
+  non-English post uses its own language by default, admitting foreign words only
+  as canonical terms, listed names, identifiers or quotations. It wraps
+  `tools/gate_word_choice.py` from the
+  [semantic-cores](https://github.com/relux-works/semantic-cores) repository and
+  merges the blog-only overlay `.scripts/word-choice/blog-word-choice.json`
+  (project names such as `Caveman`, `Pohuy`; the `MCP` acronym) into the shared
+  policy; an overlay entry the core already lists is refused. Body and front
+  matter (`title`, `description`) are gated as separate texts. Both keys are
+  required: a missing or empty one is refused, never reported as a clean part.
+  The front matter block must start with a `key:` line (the same rule the
+  shared gate uses to tell front matter from prose), every key line is `key:`
+  at column zero with no space before the colon and a space or line end after
+  it, continuation lines are indented, and the only other column-zero lines
+  allowed are `#` comments; any other column-zero line (`key :`, `"key":`,
+  `key:value`) is refused with `FRONT_MATTER_UNSUPPORTED` under every key, so
+  a gated key the walk did not recognise can never be swallowed as part of a
+  neighbouring key and count as absent. A gated value is read whole whether it
+  is a one-line, wrapped or block (`>` / `|`, with or without a trailing
+  `# comment`) scalar; any other value shape, a quoted value without its
+  closing quote (a trailing comment after a quoted value is not supported) and
+  a double-quoted value containing a backslash escape (the gate judges source
+  text, not the decoded value) are refused with `FRONT_MATTER_UNSUPPORTED`
+  instead of being gated in part. Front matter is plain text while the shared
+  gate scans Markdown, so a value containing anything the scanner strips (a
+  line starting with `>`, a code fence, inline code, a link or URL, an HTML tag
+  or comment) is also refused with `FRONT_MATTER_UNSUPPORTED` and the measured
+  ratio of letters judged; write such values as plain words instead. Known
+  bound: a trailing ` # comment` on a plain (unquoted) scalar is gated as text,
+  which can only add violations, never hide them. Run:
+  `SEMANTIC_CORES_DIR=/path/to/semantic-cores python3 .scripts/word_choice_gate.py posts/<slug>.ru.md --language ru`
+  (add `--format json` for machine-readable counts). Exit 0 only when every
+  text has zero violations; a missing checkout, a missing gate or a gate
+  without the functions this entry point calls (`GATE_INCOMPATIBLE`) fails closed.
+- **Post preservation check** (`.scripts/check_post_preservation.py`) compares a
+  post before and after a rewrite and fails when front matter (except keys named
+  with `--allow-frontmatter-key`), link destinations, fenced code, inline code
+  spans, numbers, heading levels, table rows, list items or paragraph count
+  differ. Run:
+  `python3 .scripts/check_post_preservation.py --before <old.md> --after posts/<slug>.ru.md --allow-frontmatter-key description`.
+- **Script tests** (`.scripts/tests/`) hold the negative and positive controls for
+  both scripts. Run `SEMANTIC_CORES_DIR=/path/to/semantic-cores python3 -m unittest discover -s .scripts/tests`.
+  Logs, before-copies and mutant runs from a rewrite task go under
+  `.temp/<TASK-ID>/`, which the tracked `.gitignore` excludes.
 
 ## Provenance model
 
