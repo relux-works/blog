@@ -1,6 +1,6 @@
 ---
-title: "Do Short Field Names Actually Save Agent Tokens?"
-description: "A reproducible study of field-name aliases in agent-facing CLI output: raw token counts, comprehension, session economics, and why schema-once formats make abbreviations mostly redundant."
+title: "Field Name Aliases in Schema-Once Output: Do They Save Tokens?"
+description: "A bounded study of schema-once field aliases: historical fixture measurements, a conditional session model, verified DSL batching, and what the evidence does and does not establish about MCP token economics."
 slug: "field-name-alias-token-study"
 lang: "en"
 authors:
@@ -13,211 +13,295 @@ aiSystems:
   - "OpenAI Codex"
 ---
 
-Agent-facing tools should return only the data an agent needs, in a form that consumes as little context as practical. Once a CLI supports field projection, batching, and compact tabular output, another optimization looks tempting: abbreviate field names.
+**A compact formatter has already paid to say a field name once. Is an alias dictionary worth another schema lookup to save a few tokens?**
 
-Replace `status` with `s`, `assignee` with `a`, and `description` with `d`. The strings become shorter, so the output should use fewer tokens.
+*February 2026; evidence boundaries revised September 2026.*
 
-We tested that idea in [agentquery](https://github.com/relux-works/skill-agent-facing-api), our Go library and design pattern for agent-facing CLI query layers. The result was a no-go. In a schema-once format, aliases saved a fixed five tokens per eligible response. Teaching the alias dictionary cost 85 tokens. Under the compact-session scenarios we modeled, aliases produced a net loss 75% of the time.
+## The question and its boundary
 
-The more useful finding was structural: once field names appear only once, shortening them has almost nothing left to optimize.
+A task-list formatter can return a header once and values beneath it:
 
-## The Optimization Stack Before Aliases
+~~~text
+id,name,status
+T-209,Schema migration,development
+T-210,Release notes,to-review
+~~~
 
-A token-efficient query layer already has four stronger tools:
+This is the familiar baseline: field names identify the columns once, while the
+rows carry only values. Replacing the header with aliases such as
+`i,n,s` can make that one line shorter, but it also requires an agent to learn and retain the dictionary.
 
-1. **Field projection** returns only requested fields.
-2. **Compact tabular output** declares a schema once, then emits value rows without repeated keys.
-3. **Batching** combines several lookups into one tool call.
-4. **Presets** give common field bundles short, meaningful names.
+This article asks a deliberately bounded question: **for this repository's
+schema-once compact formatter, do field aliases justify their discovery and
+comprehension cost?** It covers the checked-in alias fixtures, the associated
+session model, and the current Go implementation of compact output and `DSL`
+batching. It does not establish a token winner between the `DSL` and MCP, and it
+does not generalize the results to arbitrary tokenizers, hosts, or transports.
 
-Aliases target repeated field names. Compact output has already removed that repetition.
+The evidence types are kept distinct throughout:
 
-Consider this JSON:
+| Label | What it means here |
+| --- | --- |
+| **Verified implementation fact** | Current source and executable tests establish a behavior of this Go implementation. |
+| **Checked-in historical measurement** | A fixture, script, and recorded result exist, but this revision did not rerun the tokenizer. |
+| **Model estimate** | A simulator result depends on stated constants and eviction assumptions; it is not a runtime observation. |
+| **Reasoning** | A conditional design recommendation rather than a numeric result. |
+| **Unknown** | The repository has no aligned artifact that could support the claim. |
 
-```json
-[
-  {"id":"T-1","status":"done","assignee":"alice"},
-  {"id":"T-2","status":"blocked","assignee":"bob"}
-]
-```
+The detailed classification and MCP claim dispositions are in the accepted
+[MCP token-economics evidence map](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/260923_mcp-token-economics-evidence.md).
 
-Every object repeats the keys. A compact schema-once representation writes them once:
+## Study 1: What one abbreviated header saves
 
-```text
-id,status,assignee
-T-1,done,alice
-T-2,blocked,bob
-```
+**Evidence: checked-in historical measurement.** The fixtures use task-tracker
+payloads at 5, 20, 100, and 500 items, each with eight fields:
+`id`, `name`, `status`,
+`assignee`, `description`,
+`priority`, `created`, and `updated`.
+The checked-in [measurement script](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/synthetic-payloads/measure.py)
+tokenizes fixed JSON, compact-full, and compact-alias fixtures with
+`tiktoken` and `cl100k_base`. These are historical fixture
+results, not tokenizer counts re-attested by this revision.
 
-Aliases can shorten only that one header:
-
-```text
-i,s,a
-T-1,done,alice
-T-2,blocked,bob
-```
-
-The data rows, which dominate larger payloads, remain identical.
-
-## Study 1: Raw Token Savings
-
-We generated synthetic task-tracker payloads at four scales: 5, 20, 100, and 500 items. Every item had eight fields: `id`, `name`, `status`, `assignee`, `description`, `priority`, `created`, and `updated`.
-
-Each dataset was rendered in three forms:
-
-- pretty-printed JSON;
-- compact CSV-style output with full field names;
-- the same compact output with one-character aliases.
-
-The generator used a fixed random seed of 42. Counts were measured with OpenAI's `cl100k_base` encoding through `tiktoken`. These are tokenizer-specific measurements, not universal counts for every model provider. The [generator, payloads, and measurement script](https://github.com/relux-works/skill-agent-facing-api/tree/main/.research/synthetic-payloads) are public.
-
-### Raw counts
-
-| Items | JSON | Compact, full names | Compact, aliases |
+| Items | JSON | Compact-full | Compact-alias |
 | ---: | ---: | ---: | ---: |
 | 5 | 485 | 269 | 264 |
 | 20 | 1,957 | 1,055 | 1,050 |
 | 100 | 9,836 | 5,283 | 5,278 |
 | 500 | 48,933 | 26,144 | 26,139 |
 
-### Marginal savings
+The same recorded data makes the contrast explicit:
 
 | Transition | 5 items | 20 items | 100 items | 500 items |
 | --- | ---: | ---: | ---: | ---: |
-| JSON to compact | -44.5% | -46.1% | -46.3% | -46.6% |
-| Compact to aliases | -1.86% | -0.47% | -0.09% | -0.02% |
-| Absolute alias saving | 5 tok | 5 tok | 5 tok | 5 tok |
+| JSON to compact-full | -44.5% | -46.1% | -46.3% | -46.6% |
+| Compact-full to compact-alias | -1.86% | -0.47% | -0.09% | -0.02% |
+| **Absolute alias saving** | **5 tok** | **5 tok** | **5 tok** | **5 tok** |
 
-Compact output removed roughly 46% of `cl100k_base` tokens. Aliases then saved exactly five more tokens at every scale.
+The concrete example explains the fixed result. The full header
 
-The reason is visible in the wire format. The full header consumed 14 tokens:
-
-```text
+~~~text
 id,name,status,assignee,description,priority,created,updated
-```
+~~~
 
-The aliased header consumed nine:
+is emitted once; the abbreviated version
 
-```text
+~~~text
 i,n,s,a,d,p,c,u
-```
+~~~
 
-The difference is fixed. Adding 495 more rows does not repeat the header and creates no new alias saving.
+changes only that declaration. The value rows do not repeat either set of field
+names. The historical fixture counts therefore show a 5-token header delta at
+every tested payload size; they do not prove the same percentage or token count
+for another tokenizer or formatter.
 
-## Study 2: Comprehension
+The per-item values below are another view of those same historical fixtures,
+not a new measurement:
 
-Small savings could still be useful if aliases were free to understand. We tested three levels of schema complexity:
+| Items | JSON tok/item | Compact-full tok/item | Compact-alias tok/item |
+| ---: | ---: | ---: | ---: |
+| 5 | 97.0 | 53.8 | 52.8 |
+| 20 | 97.8 | 52.8 | 52.5 |
+| 100 | 98.4 | 52.8 | 52.8 |
+| 500 | 97.9 | 52.3 | 52.3 |
 
-| Level | Fields | Alias style | Collision risk |
-| --- | ---: | --- | --- |
-| 1 | 5 | Single character | Low |
-| 2 | 15 | One or two characters | Medium |
-| 3 | 30 | Near-collisions such as `s`, `sc`, `sp`, `st`, `sr` | High |
+## Study 2: What a remembered dictionary costs
 
-Each level contained 12 data items and 10 questions covering direct lookup, filtering, cross-reference, aggregation, and multi-field reasoning. Every dataset was tested twice: once with full names, and once with aliases plus an explicit dictionary.
+**Evidence: checked-in historical benchmark record.** The comprehension
+materials under [`.research/comprehension-tests`](https://github.com/relux-works/skill-agent-facing-api/tree/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/comprehension-tests/)
+compare full names with aliases at three levels: 5, 15, and 30 fields. Each
+level has 12 data items and 10 questions spanning lookup, filtering,
+cross-reference, aggregation, and multi-field reasoning. The earlier benchmark
+reported the following result when an explicit dictionary was supplied:
 
-Claude Opus 4.6 answered all 60 conditions correctly: 10/10 for full names and 10/10 for aliases at every level. The recorded [benchmark and fixtures](https://github.com/relux-works/skill-agent-facing-api/tree/main/.research/comprehension-tests) are available in the source repository.
+| Level | Fields | Abbreviated | Full | Delta |
+| --- | ---: | :---: | :---: | ---: |
+| 1 | 5 | 10/10 (100%) | 10/10 (100%) | 0% |
+| 2 | 15 | 10/10 (100%) | 10/10 (100%) | 0% |
+| 3 | 30 | 10/10 (100%) | 10/10 (100%) | 0% |
 
-This was a same-pipeline evaluation, not an independent model benchmark. The model that answered the questions also participated in the evaluation workflow. Ground truth was checked by field position, and the comparison used identical data, so the result supports a narrow claim: this test observed no accuracy delta when the dictionary remained present. It does not prove that aliases are harmless across models, domains, or long contexts.
+This result is bounded. The tests and answers were produced in the same
+pipeline, so the useful signal is the reported delta, not a general claim about
+model accuracy. The benchmark was not rerun for this revision.
 
-Even with perfect answers, the 30-field condition exposed friction. A question about sprint and scope required resolving `sp` and `sc` while avoiding `s` for status and `st` for story points. Full names needed no dictionary lookup.
+The growing task-list example also exposes the operational risk. Once a header
+contains aliases such as `s`, `sc`,
+`sp`, and `st`, an agent answering a question about
+T-209 must first recover the dictionary, then find the row and its columns.
+The source materials identify five failure modes:
 
-Aliases also introduce operational failure modes:
+1. No dictionary leaves an alias such as `c` ambiguous.
+2. Domain priors can conflict with a tool's chosen alias.
+3. Different tools can reuse the same alias for different fields.
+4. Partial context eviction can leave an incomplete dictionary.
+5. Large aggregations add attention pressure even when the dictionary is present.
 
-- a missing or partially evicted dictionary makes one-character headers ambiguous;
-- two tools may assign different meanings to the same alias;
-- dense collision families require repeated lookup;
-- wide tables still require difficult column tracking;
-- a stale dictionary can produce a plausible but incorrect interpretation.
+An explicit dictionary prevents the first failure in the historical benchmark,
+but it creates the discovery and retention requirement evaluated next.
 
-The test showed that a dictionary can preserve comprehension in a controlled case. Requiring that dictionary creates the economic problem measured next.
+## Study 3: The alias session model
 
-## Study 3: Session Economics
+**Evidence: model estimate, not a runtime measurement.** The
+[session simulator](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/session-simulator/simulate.py)
+models an agent that refreshes its alias dictionary after every `K` turns. It
+hard-codes the historical 85-token schema roundtrip and 5-token compact-header
+saving, plus a query mix and eviction schedule. Those inputs are assumptions of
+the model; they are not observations of Codex, Claude, MCP, or another agent
+host.
 
-We measured an 85-token `schema()` roundtrip on real agentquery CLI output:
+| Model input | Value used by the simulator | Evidence boundary |
+| --- | ---: | --- |
+| Schema roundtrip | 85 tok | Historical measurement reused as a model input |
+| Compact alias saving per query | 5 tok | Historical fixture result reused as a model input |
+| Context eviction and query mix | Scenario-specific | Assumption |
 
-- 10 tokens for the call;
-- 71 tokens for the response;
-- 4 tokens of modeled framing overhead.
+With those inputs, the simulator produces these estimates:
 
-An aliased compact header saved five tokens on a query that returned such a header. The theoretical break-even point is therefore 17 eligible data queries after each schema lookup:
-
-```text
-85 / 5 = 17
-```
-
-Real workflows also include operations such as `summary()` that receive no alias benefit. Our simulator used this query mix:
-
-- 50% `get`;
-- 30% `list`;
-- 10% `summary`;
-- 10% other operations.
-
-That mix averages four saved tokens per query and pushes practical break-even above 21 mixed queries per dictionary load.
-
-We modeled 16 compact-output scenarios using session lengths of 10, 20, 50, and 100 queries, with dictionary reload intervals of 10, 20, 50, or never. These are explicit simulation assumptions, not observed production context-eviction rates. The [simulator and complete results](https://github.com/relux-works/skill-agent-facing-api/tree/main/.research/session-simulator) are reproducible.
-
-| Session | Reload interval | Schema calls | Schema cost | Alias savings | Net |
+| Session queries | Eviction `K` | Schema calls | Schema cost | Alias savings | Net |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 10 | 10 | 1 | 85 | 40 | -45 |
+| 10 | never | 1 | 85 | 40 | -45 |
 | 20 | 10 | 2 | 170 | 80 | -90 |
 | 20 | 20 | 1 | 85 | 80 | -5 |
-| 50 | 20 | 3 | 255 | 200 | -55 |
+| 50 | 10 | 5 | 425 | 200 | -225 |
 | 50 | 50 | 1 | 85 | 200 | +115 |
 | 100 | 10 | 10 | 850 | 400 | -450 |
 | 100 | 20 | 5 | 425 | 400 | -25 |
+| 100 | 50 | 2 | 170 | 400 | +230 |
 | 100 | never | 1 | 85 | 400 | +315 |
 
-Aliases had a positive balance in 4 of the 16 compact scenarios. Every positive case required at least 50 queries and no dictionary reload more often than every 50 queries.
+For its compact-format cases, the simulator evaluates 16 cases and reports four
+positive outcomes. For example, its compact scenario for 20 queries with `K=20`
+returns -5, while 50 queries with `K=50` returns +115. That result supports only
+this conditional statement: aliases can be positive when the model's discovery
+cost is amortized over sufficiently many remembered queries. It does not measure
+a typical agent session or a transport comparison.
 
-### Batching beats aliasing
+The simple all-data-query amortization check for the model's 85-token and
+5-token inputs is:
 
-The difference becomes clearer in a common workflow: check five task statuses.
+~~~text
+break_even_queries >= schema_cost / savings_per_query
+net_positive_queries > schema_cost / savings_per_query
+~~~
 
-Five separate compact lookups cost 246 tokens in the recorded model, including one schema call. Aliases saved 25 response tokens but required the 85-token dictionary, for a net loss of 60 tokens.
+At those inputs, 17 such data queries exactly amortize one schema roundtrip;
+net-positive savings begin at 18. These are derived model values, not
+host-independent thresholds.
 
-One batched lookup cost approximately 165 tokens. Batching saved about 81 tokens without a dictionary or readability loss.
+### Batching is a separate implementation capability
 
-The precise values depend on query shape and tokenizer. The ordering does not: batching removes whole call boundaries, while aliases shorten one header.
+The alias model should not be turned into a claim that one transport universally
+beats another. Still, batching changes the local execution shape in a way the
+current implementation can verify.
 
-## Why JSON Creates the Wrong Incentive
+**Situation:** an agent needs the status of T-209, T-210, and T-211.
+**Expected behavior:** this `DSL` accepts semicolon-separated statements and
+returns the results in source order.
 
-Aliases look more attractive in JSON because keys repeat inside every object. In our model, aliases saved about three tokens per item in a JSON list. All 16 modeled JSON scenarios had a positive alias balance.
+~~~text
+get(T-209) { status }; get(T-210) { status }; get(T-211) { status }
+~~~
 
-That does not make aliases the best optimization. Switching from JSON to compact output removed about 46% of tokens in the measured payloads. Once the format changed, the repeated keys disappeared and so did most of the alias opportunity.
+The parser and executor implement this multi-statement behavior, and the [test
+suite](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/query_test.go#L276-L319)
+covers three batched statements and [compact rendering](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/query_test.go#L1161-L1193).
+This shows a capability of this Go `DSL`. It does not supply a per-call token
+total, prove a particular host framing cost, or establish anything about an MCP
+server's batching behavior.
 
-JSON aliases and schema-once output address the same source of waste. Applying both produces diminishing returns.
+## Discussion: choose the structural optimization first
 
-## Structure Matters More Than Header Length
+The historical fixtures support a narrow structural insight: a schema-once
+header removes repeated field names from the rows. Aliases can only shorten
+that one declaration. The simulator then models whether learning the aliases
+pays for that fixed saving under its stated assumptions.
 
-The result aligns with work on structured inputs. [Columbo](https://arxiv.org/abs/2508.09403) studies undocumented abbreviated database columns and reports substantial degradation in schema understanding. Our controlled benchmark supplied an explicit dictionary and observed no accuracy loss, but the dictionary itself created the discovery cost.
+| Priority | Optimization | Evidence in this repository | Boundary |
+| ---: | --- | --- | --- |
+| 1 | Field projection | [Implementation](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/selector.go#L14-L24) selects requested fields | No percentage is claimed here |
+| 2 | Compact schema-once output | Historical fixtures report 44.5% to 46.6% versus JSON | Fixture and tokenizer specific |
+| 3 | Semicolon batching | Verified implementation behavior | External call savings depend on host and transport |
+| 4 | Presets | [Implementation](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/selector.go#L53-L100) feature for common selections | No token saving is asserted here |
+| 5 | Field aliases | Historical fixtures show a fixed 5-token compact-header delta | Dictionary discovery is modeled, not newly measured |
 
-[TOON](https://github.com/toon-format/toon) also uses schema-once structure with full field names. Its design targets repeated syntax and keys instead of making headers cryptic. [Better Think with Tables](https://arxiv.org/abs/2412.17189) likewise studies gains from tabular structure. These sources cover different tasks and cannot validate our exact percentages, but they point toward the same engineering priority: fix representation before abbreviating vocabulary.
+### MCP comparison: scoped conclusion
 
-Modern tokenizers add another reason to measure before shortening names. Common fields such as `status`, `name`, and `id` may already be single tokens in a given encoding. Changing a one-token word into a one-token letter saves nothing. Multi-token names can shrink, but in a schema-once header that saving still occurs only once.
+The accepted evidence map separates implementation facts from transport
+economics:
 
-## Decision
+| Question | What the evidence supports | What remains unknown |
+| --- | --- | --- |
+| Can this `DSL` batch requests? | Yes. The [parser](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/parser.go#L318-L369) accepts semicolon-separated statements and [QueryAST](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/query.go#L30-L60) executes a batch. | The token saving for a particular host or transport. |
+| Is compact output schema-once? | Yes. [FormatCompact](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/agentquery/format.go#L9-L62) writes a field header before its rows. | A universal percentage across tokenizers and payloads. |
+| Is MCP more or less token-efficient here? | No repository-local result answers this. | There is no MCP adapter, tool-definition fixture, prompt snapshot, host trace, or aligned workload. |
 
-We rejected field aliases for compact agentquery output.
+MCP batching and discovery costs must be bounded by protocol version, SDK,
+server design, and host behavior. The official
+[Ruby SDK protocol-version reference](https://ruby.sdk.modelcontextprotocol.io/protocol-versions/)
+records that protocol version 2025-06-18 removed `JSON-RPC` batching, while the
+official [TypeScript SDK request-body reference](https://ts.sdk.modelcontextprotocol.io/v2/api/@modelcontextprotocol/server/server/requestBody.html)
+documents a current maximum of 100 messages in a `JSON-RPC` batch array. Neither
+source guarantees that an agent host exposes or sends a batch, and neither
+measures prompt-token cost for this repository.
 
-| Criterion | Threshold | Measured | Result |
-| --- | ---: | ---: | --- |
-| Net token saving | More than 10% | 0.02% to 1.86%, five tokens fixed | Fail |
-| Comprehension degradation | Less than 5% | 0% in controlled benchmark | Pass |
-| Discovery economics | Better than 1:5 | 17 eligible queries per schema call | Fail |
+**Reasoning: MCP can still be the better interface when interoperability is the
+requirement rather than a proven local token minimum.** A remote service that
+must expose model-controlled tools to several MCP-capable hosts, or an existing
+MCP deployment that already meets the integration requirement, can justify MCP.
+The [MCP server overview](https://modelcontextprotocol.org/specification/draft/server/index)
+supports that tool-interoperability rationale. It is not evidence of a token
+win. The failure mode is treating any of those integration benefits as a
+measured break-even point; a real comparison needs a server/host pair, protocol
+and SDK version, discovery transcript, tokenizer, and aligned workload.
 
-The decision is specific to compact schema-once output. A different protocol, tokenizer, query mix, or persistent out-of-band schema may produce different economics.
+## Reproducing and extending the evidence
 
-## What to Optimize Instead
+The checked-in artifacts make the historical alias result inspectable:
 
-Our optimization order is now:
+| Artifact | Purpose |
+| --- | --- |
+| [Synthetic payload generator](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/synthetic-payloads/generate.py) | Generates the four fixed payload scales and three formats |
+| [Tokenizer measurement script](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/synthetic-payloads/measure.py) | Counts the fixtures with `tiktoken` and `cl100k_base` |
+| [Comprehension materials](https://github.com/relux-works/skill-agent-facing-api/tree/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/comprehension-tests/) | Holds the three alias/full test levels |
+| [Session simulator](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/session-simulator/simulate.py) | Evaluates the documented 16 model scenarios |
 
-1. **Field projection.** Do not return fields the agent did not request.
-2. **Compact schema-once output.** Remove repeated keys and structural punctuation.
-3. **Batching.** Avoid repeated tool-call framing and latency.
-4. **Preset tuning.** Match field bundles to real workflows.
-5. **Value-level experiments.** Measure date, enum, and identifier representations separately before changing them.
+Run the tokenizer measurement only in an isolated environment where
+`tiktoken` is installed:
 
-This hierarchy favors savings that begin on the first query and require no hidden dictionary. It also preserves self-describing output, which matters when agents switch tools, lose old context, or hand evidence to a human.
+~~~bash
+python3 .research/synthetic-payloads/generate.py
+python3 .research/synthetic-payloads/measure.py
+~~~
 
-The lesson is broader than field names: optimize repeated structure before compressing meaning. Once a format declares its schema only once, readable names become nearly free.
+Run the model separately so its output is not presented as a measurement:
+
+~~~bash
+python3 .research/session-simulator/simulate.py
+~~~
+
+To make an MCP token claim, add a distinct, reproducible benchmark with the
+exact server, host, protocol/SDK version, tool definitions, prompt snapshot,
+tokenizer, and workload. Do not reuse the historical 346-element comparison as
+if those artifacts were present here.
+
+## Conclusion: the decision for this formatter
+
+**Do not add field aliases to this compact formatter on the current evidence.**
+The checked-in fixtures show that aliases are a one-header optimization, and
+the session model turns that small fixed gain into a benefit only under its
+explicit retention assumptions. For this formatter, aliases are a one-header
+optimization; no repository-local MCP benchmark establishes a transport-wide
+token winner.
+
+The concrete next action is therefore conditional: prioritize field projection,
+compact schema-once output, and the existing `DSL` batching capability for this
+formatter; choose MCP when interoperability requires it; and measure an aligned
+host/server workload before making any transport-token claim.
+
+## References
+
+1. [MCP Token-Economics Evidence Map](https://github.com/relux-works/skill-agent-facing-api/blob/a04b6be6fa81a8a804dc9cb527dd43501a9c854b/.research/260923_mcp-token-economics-evidence.md), repository research note, September 2026.
+2. [MCP Ruby SDK protocol versions](https://ruby.sdk.modelcontextprotocol.io/protocol-versions/), official protocol-version reference.
+3. [MCP TypeScript SDK request body](https://ts.sdk.modelcontextprotocol.io/v2/api/@modelcontextprotocol/server/server/requestBody.html), official request-body reference.
+4. [MCP server overview](https://modelcontextprotocol.org/specification/draft/server/index), official specification.
