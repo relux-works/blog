@@ -343,7 +343,7 @@ Two operators, Alice and Bob, work on one project. Alice uses Claude and Codex s
    - the order goes to the supplier portal (a tool owner), and if the supplier's confirmation event does not arrive within 15 minutes, the order escalates;
    - once every delivery line is received, the order is handed off to the accounting process as an invoice;
    - `payment.received` arrives as an external event and marks it paid;
-   - a weekly schedule creates the inventory check ([example](https://github.com/relux-works/curator-playbook/blob/main/examples/cafe.playbook.json)).
+   - a weekly schedule creates the inventory check ([example](https://github.com/relux-works/curator-playbook/blob/main/examples/cafe/cafe.playbook.json)).
 
    Nothing in the kernel knows what a café is.
 
