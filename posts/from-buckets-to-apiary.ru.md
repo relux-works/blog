@@ -145,20 +145,20 @@ task-board уже даёт рекомендательные подсказки �
 
 "Что можно запустить прямо сейчас в этом профиле?" Это один запрос, на который отвечает агрегатор в agents-management (решено 24 сентября). Данные к нему приходят из трёх мест:
 - лимиты провайдеров из уже существующего слоя лимитов модуля;
-- состояние движков из curator-engine;
+- состояние движков из curator-inference-manager;
 - логин внутри управляемой папки из Curator.
 
 Факты привязаны к паре `(runtime, managed home)`, потому что логин живёт в конкретной папке ([LP D9](https://github.com/relux-works/skill-project-management/blob/main/.specs/drafts/launch-profiles.md#d9-availability-one-block-keyed-by-managed-home)). Неудачное чтение никогда не считается свободным запасом. Спецификацию ещё предстоит написать, это веха M5b ([роадмап M5b](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#m5b-availability-per-profile)).
 
-### 4.3 Локальные модели: curator-engine
+### 4.3 Локальные модели: curator-inference-manager
 
-Локальными движками владеет `curator-engine`, а сам Curator о движках ничего не знает:
-- **Провайдер.** Зонтичный провайдер, который лежит в доверенном корне и никогда в `~/.local/bin`, с командами `curator engine status|ensure|release|stop` ([§2](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#2-the-provider)).
+Локальными движками владеет `curator-inference-manager`, а сам Curator о движках ничего не знает:
+- **Провайдер.** Зонтичный провайдер, который лежит в доверенном корне и никогда в `~/.local/bin`, с командами `curator-inference-manager status|ensure|release|stop` ([§2](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#2-the-provider)).
 - **Аренды.** `ensure` берёт аренду на срок вызывающего или передаёт её запущенной среде.
-- **Жизненный цикл и арбитраж.** Движки проходят состояния `serving → lingering → draining`. Арбитраж хоста ограничивает число движков в памяти и никогда не гасит движок с активными арендами ([§4](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#4-lifecycle)).
-- **Два факта доступности.** `ready` значит, что движок работает или ещё держится. `ensurable` значит, что веса на месте, движок не на карантине и арбитраж его пропустит. Холодный, но `ensurable` движок остаётся в выборе, просто с ценой старта ([§5](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#5-availability-facts)).
+- **Жизненный цикл и арбитраж.** Движки проходят состояния `serving → lingering → draining`. Арбитраж хоста ограничивает число движков в памяти и никогда не гасит движок с активными арендами ([§4](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#4-lifecycle)).
+- **Два факта доступности.** `ready` значит, что движок работает или ещё держится. `ensurable` значит, что веса на месте, движок не на карантине и арбитраж его пропустит. Холодный, но `ensurable` движок остаётся в выборе, просто с ценой старта ([§5](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#5-availability-facts)).
 
-Под всем этим всё ещё лежит устаревший agents-infra: его остаток крутит локальные модели и даёт task-board контракты `compose` и `prepare` ([карта вики](https://github.com/relux-works/wiki/blob/main/README.md#deprecated)). Веха M5a переносит брокер локальных моделей из agents-infra в curator-engine, и это открывает дорогу к архиву agents-infra (M6). Запись об этом решении получит номер 0020; номер зарезервирован, текста пока нет.
+Под всем этим всё ещё лежит устаревший agents-infra: его остаток крутит локальные модели и даёт task-board контракты `compose` и `prepare` ([карта вики](https://github.com/relux-works/wiki/blob/main/README.md#deprecated)). Веха M5a переносит брокер локальных моделей из agents-infra в curator-inference-manager, и это открывает дорогу к архиву agents-infra (M6). Запись об этом решении получит номер 0020; номер зарезервирован, текста пока нет.
 
 В сумме простая задача ночью уходит на локальную модель, сложная на передовую, и ни один из этих выборов не делает человек, переключая вкладки.
 
@@ -166,9 +166,9 @@ task-board уже даёт рекомендательные подсказки �
 
 **Проблема.** Все агенты на машине выходят в сеть одним путём, и два запуска не могут одновременно использовать два разных выхода.
 
-У запуска пять независимых настроек: профиль Curator, выбор учётных данных, привязка среды исполнения, **сетевой профиль** и профиль исполнения ([N1](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md#n1-five-independent-launch-settings)). Выбор учётных данных определяет аккаунт, а сетевой профиль определяет, через какой прикладной прокси пойдут поддерживаемые соединения именно этого запуска. Вместе они позволяют двум агентам на одной машине работать бок о бок с двумя аккаунтами и двумя выходами в сеть.
+У запуска пять независимых настроек: профиль Curator, выбор учётных данных, привязка среды исполнения, **сетевой профиль** и профиль исполнения ([N1](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md#n1-five-independent-launch-settings)). Выбор учётных данных определяет аккаунт, а сетевой профиль определяет, через какой прикладной прокси пойдут поддерживаемые соединения именно этого запуска. Вместе они позволяют двум агентам на одной машине работать бок о бок с двумя аккаунтами и двумя выходами в сеть.
 
-Это кооперативная маршрутизация поддерживаемых клиентов через прокси. Процесс она не изолирует, поэтому песочницей мы её не называем. `curator-network` представляет собой библиотеку `resolve → validate → probe → patch`, которая не запускает процессов. Её патч применяют владельцы процессов прямо перед запуском: лаунчер `curator-run`, запуск дочерних агентов в task-board и хост сессий ([N2](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md#n2-one-library-three-process-owners)). Это и есть прокси-возможность лаунчера. Веха M7.
+Это кооперативная маршрутизация поддерживаемых клиентов через прокси. Процесс она не изолирует, поэтому песочницей мы её не называем. `curator-network-profiles` представляет собой библиотеку `resolve → validate → probe → patch`, которая не запускает процессов. Её патч применяют владельцы процессов прямо перед запуском: лаунчер `curator-run`, запуск дочерних агентов в task-board и хост сессий ([N2](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md#n2-one-library-three-process-owners)). Это и есть прокси-возможность лаунчера. Веха M7.
 
 ## 6. Цели: у каждого агента своя, вложенная и доставленная куда угодно
 
@@ -331,7 +331,7 @@ PC1 грузит этот конфиг с тем же поведением; PC2 
 4. **Области.** Оркестратор Алисы арендует эпик Auth, оркестратор Боба эпик Billing. Когда оркестратор Алисы пытается запустить агента по истории из Billing, ядро отказывает (`scope_owned_by`), и оркестраторы договариваются о передаче сообщениями `coord`.
 5. **Находка уходит в доставку.**
    - bug-hunt доказывает находку. Его действие `handoff` создаёт `dev-task` в dev-cycle и ставит обратную ссылку.
-   - Задача переходит `open → development`. Разработчик Боба работает на его локальном движке: curator-engine выполняет `ensure`, картина доступности заранее сказала, что движок `ensurable`, и применяется сетевой профиль этого запуска.
+   - Задача переходит `open → development`. Разработчик Боба работает на его локальном движке: curator-inference-manager выполняет `ensure`, картина доступности заранее сказала, что движок `ensurable`, и применяется сетевой профиль этого запуска.
    - На `review` потребность ревьюера в другом издателе на машине Боба не выполняется. Срабатывает `ask`, и Боб один раз одобряет "ревью тем же издателем для этого эпика, 30 дней"; выбор это записывает.
 6. **Спецификацию опровергают.** Для исправления нужна небольшая спецификация. Её состояние `challenge` находит, что черновик предлагает релизные теги без `v`, а записанное решение говорит `vX.Y.Z`, и возвращает её в `draft` с этой парой в цитате.
 7. **Остановка требует человека.**
@@ -416,8 +416,8 @@ PC1 грузит этот конфиг с тем же поведением; PC2 
 | Оркестрация | как работает проект и что дальше | сегодня task-board; [curator-playbook](https://github.com/relux-works/curator-playbook); [curator-model-router](https://github.com/relux-works/curator-model-router) | task-board в поддержке; черновики | [process-configuration.md](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md), [model-routing.md](https://github.com/relux-works/curator-model-router/blob/main/spec/model-routing.md) |
 | Сессии | кто держит живую сессию: цели внутрь, события наружу | `agent-session-host` (новый); потом ax; сегодня tb-sessiond | первый приоритет | [роадмап §3 SH](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#sh-session-host-module) |
 | Доступность | что можно запустить сейчас, по профилю | агрегатор в agents-management | спецификацию предстоит написать | [роадмап M5b](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#m5b-availability-per-profile) |
-| Инференс | какие локальные движки подняты | [curator-engine](https://github.com/relux-works/curator-engine) | черновик | [inference-plane.md](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md) |
-| Сеть | через какой выход идёт запуск | [curator-network](https://github.com/relux-works/curator-network) | черновик | [network-profiles.md](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md) |
+| Инференс | какие локальные движки подняты | [curator-inference-manager](https://github.com/relux-works/curator-inference-manager) | черновик | [inference-plane.md](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md) |
+| Сеть | через какой выход идёт запуск | [curator-network-profiles](https://github.com/relux-works/curator-network-profiles) | черновик | [network-profiles.md](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md) |
 | Запуск | как намерение превращается в argv и окружение | модуль [agents-management](https://github.com/relux-works/skill-agents-management); [curator-agent-launcher](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | модуль работает; у лаунчера пока нет тега | [профили запуска](https://github.com/relux-works/skill-project-management/blob/main/.specs/drafts/launch-profiles.md), решения [0019](https://github.com/relux-works/curator-spec/blob/main/decisions/0019-fragment-consumers-and-one-construction-site.md) и [0021](https://github.com/relux-works/curator-spec/blob/main/decisions/0021-sessions-enter-through-curator-run.md) |
 | Контекст | что получает агент | [Curator](https://github.com/relux-works/curator) | кандидаты в релиз | [curator-spec](https://github.com/relux-works/curator-spec) |
 

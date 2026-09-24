@@ -145,20 +145,20 @@ A task assessor turns the work into requirements, deterministically first and wi
 
 "What can run now, in this profile?" is one query answered by an aggregator in agents-management (decided 2026-09-24). Three sources feed it:
 - provider limits, from the module's existing limit plane;
-- engine state, from curator-engine;
+- engine state, from curator-inference-manager;
 - login inside the managed home, from Curator.
 
 Facts are keyed by `(runtime, managed home)`, because a login is per home ([LP D9](https://github.com/relux-works/skill-project-management/blob/main/.specs/drafts/launch-profiles.md#d9-availability-one-block-keyed-by-managed-home)). A failed read never counts as headroom. The specification is still to be written, as milestone M5b ([roadmap M5b](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#m5b-availability-per-profile)).
 
-### 4.3 Local models: curator-engine
+### 4.3 Local models: curator-inference-manager
 
-`curator-engine` owns local engines, and Curator itself stays engine-blind:
-- **Provider.** An umbrella provider found on a trust root, never in `~/.local/bin`, that offers `curator engine status|ensure|release|stop` ([§2](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#2-the-provider)).
+`curator-inference-manager` owns local engines, and Curator itself stays engine-blind:
+- **Provider.** An umbrella provider found on a trust root, never in `~/.local/bin`, that offers `curator-inference-manager status|ensure|release|stop` ([§2](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#2-the-provider)).
 - **Leases.** `ensure` takes a lease for the caller's deadline or hands it to the launched harness.
-- **Lifecycle and arbitration.** Engines move `serving → lingering → draining`. Host arbitration caps the number of resident engines and never drains an engine that holds active leases ([§4](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#4-lifecycle)).
-- **Two availability facts.** `ready` means serving or lingering; `ensurable` means the weights are present, the engine is not quarantined and arbitration would admit it. A cold but ensurable engine stays selectable at a start cost ([§5](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md#5-availability-facts)).
+- **Lifecycle and arbitration.** Engines move `serving → lingering → draining`. Host arbitration caps the number of resident engines and never drains an engine that holds active leases ([§4](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#4-lifecycle)).
+- **Two availability facts.** `ready` means serving or lingering; `ensurable` means the weights are present, the engine is not quarantined and arbitration would admit it. A cold but ensurable engine stays selectable at a start cost ([§5](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md#5-availability-facts)).
 
-agents-infra, deprecated, is still underneath: its residual runs local models and provides task-board's compose and prepare contracts ([wiki map](https://github.com/relux-works/wiki/blob/main/README.md#deprecated)). Milestone M5a moves the local-model broker out of agents-infra into curator-engine, which unblocks archiving agents-infra (M6). Its decision record will be Decision 0020, reserved and not yet written.
+agents-infra, deprecated, is still underneath: its residual runs local models and provides task-board's compose and prepare contracts ([wiki map](https://github.com/relux-works/wiki/blob/main/README.md#deprecated)). Milestone M5a moves the local-model broker out of agents-infra into curator-inference-manager, which unblocks archiving agents-infra (M6). Its decision record will be Decision 0020, reserved and not yet written.
 
 Put together, a trivial task can land on a local model at night, a hard one on a frontier model, and neither choice is made by a person switching tabs.
 
@@ -166,9 +166,9 @@ Put together, a trivial task can land on a local model at night, a hard one on a
 
 **The problem.** Every agent on a machine leaves through the same network path, and two launches cannot use two egresses at the same time.
 
-A launch has five independent settings: the Curator profile, the credential selection, the runtime binding, the **network profile** and the execution profile ([N1](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md#n1-five-independent-launch-settings)). The credential selection picks the account; the network profile decides which application proxy the supported connections of that one launch go through. Together they let two agents on one machine use two accounts and two egresses side by side.
+A launch has five independent settings: the Curator profile, the credential selection, the runtime binding, the **network profile** and the execution profile ([N1](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md#n1-five-independent-launch-settings)). The credential selection picks the account; the network profile decides which application proxy the supported connections of that one launch go through. Together they let two agents on one machine use two accounts and two egresses side by side.
 
-This is cooperative proxy routing for supported clients. It does not isolate a process, so we avoid calling it a sandbox. `curator-network` is a library, `resolve → validate → probe → patch`, that starts no processes. The process owners apply its patch just before spawn: the launcher `curator-run`, task-board's spawn and the session host ([N2](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md#n2-one-library-three-process-owners)). That is the proxy capability of the launcher. Milestone M7.
+This is cooperative proxy routing for supported clients. It does not isolate a process, so we avoid calling it a sandbox. `curator-network-profiles` is a library, `resolve → validate → probe → patch`, that starts no processes. The process owners apply its patch just before spawn: the launcher `curator-run`, task-board's spawn and the session host ([N2](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md#n2-one-library-three-process-owners)). That is the proxy capability of the launcher. Milestone M7.
 
 ## 6. Goals: one per agent, recursive, delivered everywhere
 
@@ -331,7 +331,7 @@ Two operators, Alice and Bob, work on one project. Alice uses Claude and Codex s
 4. **Scopes.** Alice's orchestrator leases Epic Auth, and Bob's leases Epic Billing. When Alice's orchestrator tries to spawn on a Billing story, the kernel refuses (`scope_owned_by`), and the orchestrators negotiate a hand-off with `coord` messages.
 5. **A finding flows into delivery.**
    - bug-hunt proves a finding. Its `handoff` action creates a `dev-task` in dev-cycle and links it back.
-   - The task moves `open → development`. Bob's developer runs on his local engine: curator-engine `ensure`s it, the availability view said it was ensurable, and the network profile of that launch applies.
+   - The task moves `open → development`. Bob's developer runs on his local engine: curator-inference-manager `ensure`s it, the availability view said it was ensurable, and the network profile of that launch applies.
    - At `review`, the reviewer's need for another publisher fails on Bob's machine. `ask` fires, and Bob approves "same-publisher review for this epic, 30 days" once; the selection records it.
 6. **A spec is refuted.** The fix needs a small specification. Its `challenge` state finds that the draft proposes plain release tags while a recorded decision says `vX.Y.Z`, and sends it back to `draft` with the pair quoted.
 7. **A halt needs a human.**
@@ -416,8 +416,8 @@ At that scale, tens of orchestrators and thousands of sub-agents work on one pro
 | Orchestration | how a project works and what happens next | task-board today; [curator-playbook](https://github.com/relux-works/curator-playbook); [curator-model-router](https://github.com/relux-works/curator-model-router) | task-board in maintenance; drafts | [process-configuration.md](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md), [model-routing.md](https://github.com/relux-works/curator-model-router/blob/main/spec/model-routing.md) |
 | Sessions | who hosts a live session: goals in, events out | `agent-session-host` (new); ax later; tb-sessiond today | first priority | [roadmap §3 SH](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#sh-session-host-module) |
 | Availability | what can run now, per profile | an aggregator in agents-management | specification to write | [roadmap M5b](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#m5b-availability-per-profile) |
-| Inference | which local engines are up | [curator-engine](https://github.com/relux-works/curator-engine) | draft | [inference-plane.md](https://github.com/relux-works/curator-engine/blob/main/spec/inference-plane.md) |
-| Network | which egress a launch uses | [curator-network](https://github.com/relux-works/curator-network) | draft | [network-profiles.md](https://github.com/relux-works/curator-network/blob/main/spec/network-profiles.md) |
+| Inference | which local engines are up | [curator-inference-manager](https://github.com/relux-works/curator-inference-manager) | draft | [inference-plane.md](https://github.com/relux-works/curator-inference-manager/blob/main/spec/inference-plane.md) |
+| Network | which egress a launch uses | [curator-network-profiles](https://github.com/relux-works/curator-network-profiles) | draft | [network-profiles.md](https://github.com/relux-works/curator-network-profiles/blob/main/spec/network-profiles.md) |
 | Launch | how intent becomes argv and environment | [agents-management](https://github.com/relux-works/skill-agents-management) module; [curator-agent-launcher](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | module in use; launcher untagged | [launch profiles](https://github.com/relux-works/skill-project-management/blob/main/.specs/drafts/launch-profiles.md), Decisions [0019](https://github.com/relux-works/curator-spec/blob/main/decisions/0019-fragment-consumers-and-one-construction-site.md) and [0021](https://github.com/relux-works/curator-spec/blob/main/decisions/0021-sessions-enter-through-curator-run.md) |
 | Context | what an agent receives | [Curator](https://github.com/relux-works/curator) | release candidates | [curator-spec](https://github.com/relux-works/curator-spec) |
 
