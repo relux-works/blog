@@ -50,9 +50,9 @@ model's context:
 
 Three more records follow in the same shape. At five rows the whole response is
 1,732 bytes and 485 tokens under `cl100k_base`. The roll-call needed four fields
-per record: `id`, `status`, `assignee`, `priority`. The other four, including the
-free-text `description`, were paid for and discarded. The record bodies are
-synthetic filler; only their size and shape matter here.
+per record: `id`, `status`, `assignee`, `priority`. The agent paid tokens for
+the other four, including the free-text `description`, and discarded them. The
+record bodies are synthetic filler; only their size and shape matter here.
 
 That gap is where context optimization starts. The interesting engineering
 question is where it stops: which layers repay their complexity, and which one is
@@ -98,24 +98,26 @@ for every record and omits the rest.
 [{"assignee":"heidi","id":"TASK-0001","priority":"critical","status":"in-progress"},{"assignee":"rosa","id":"TASK-0002","priority":"critical","status":"open"}]
 ~~~
 
-Holding the serialization constant and changing only the field set, the same rows
-cost:
+Holding the serialization constant and dropping only the four unrequested
+fields, the same rows get cheaper by:
 
 | Projection step | Denominator | 5 rows | 20 rows | 100 rows | 500 rows |
 | --- | --- | ---: | ---: | ---: | ---: |
 | L1 to L3, minified | minified full record | 69% | 70% | 70% | 70% |
 | L0 to L2, pretty | pretty full record | 62% | 62% | 63% | 62% |
 
-At 100 rows that is 7,037 tokens down to 2,089 on the minified side, and 9,836
-down to 3,688 on the pretty side. The exact values run from 69.08 to 70.31
+At 100 rows the minified response shrinks from 7,037 tokens to 2,089, and the
+pretty-printed one from 9,836 to 3,688. The exact values run from 69.08 to 70.31
 percent and from 61.65 to 62.51 percent across the four scales.
 
 Selection is the largest single reduction here, and it is the one layer whose
-benefit grows with the data: every description, timestamp, and name that is never
-requested is a cost that never appears. It is also the only layer that changes
-what the response contains. The projected payload is checked as an exact subset
-of the selected fields, and it makes no claim about the four fields it drops.
-That is why both rows above name their denominator.
+benefit grows with the data: every description, timestamp, and name the agent
+never asked for simply never enters the response and never costs anything. It is
+also the only layer that changes what the response contains. The measurement
+checks that the projected payload carries exactly the selected fields and
+nothing else; it makes no claim about the four fields it drops. That is also why
+both rows above name their denominator: a projection percentage only means
+something against the full record in the same serialization.
 
 One bound belongs right here. This projection drops a long free-text
 `description` and keeps four short fields. A projection that kept the description
@@ -124,32 +126,33 @@ scenario, not a rate to quote anywhere else.
 
 ## The denominator decides the credit
 
-Two orderings reach the same payload. Minify first, then project; or project
-first, then minify. The cumulative saving is identical and the attribution is
-not:
+Two orderings reach the same payload: minify the whitespace first and then
+project the fields, or project first and then minify. The cumulative saving is
+identical; which step gets the credit is not:
 
 | Ordering | First step | Second step | Cumulative |
 | --- | ---: | ---: | ---: |
 | minify, then project | L0 to L1: 28% | L1 to L3: 70% | 79% |
 | project, then minify | L0 to L2: 63% | L2 to L3: 43% | 79% |
 
-At 100 rows, projection is worth 63 percent or 70 percent depending purely on
-what happened before it. Neither number is wrong. A number quoted without its
-denominator is.
+At 100 rows, projection removes 70 percent of a record that was already minified
+and 63 percent of one that was still pretty-printed. The operation is the same;
+only the record the percentage is taken from differs. Neither number is wrong. A
+number quoted without its denominator is.
 
 The industry folklore around agent output compression lives exactly here. The
 familiar "70 to 90 percent" is close to two real quantities in this scenario and
-equal to neither: projection off a minified full record is 69 to 70 percent, and
-the whole stack from pretty full JSON down to projected compact output is 87 to
-88 percent. Both belong to this scenario's four-of-eight projection, this fixture
-set, and this tokenizer.
+equal to neither: projection removes 69 to 70 percent of a minified full record,
+and the whole stack from pretty full JSON down to projected compact output
+removes 87 to 88 percent. Both belong to this scenario's four-of-eight
+projection, this fixture set, and this tokenizer.
 
 ## Layer two: say each field name once
 
 Selection removes fields. The remaining cost is how the surviving fields are
 written. In minified JSON each of the four field names is repeated once per
-record, so 100 records carry 400 key strings for four distinct names. A header
-plus value rows says each name once:
+record, so 100 records spell out four names 400 times. A header plus value rows
+says each name once:
 
 ~~~text
 id,status,assignee,priority
@@ -163,7 +166,9 @@ TASK-0005,open,heidi,low
 The rows carry the same four fields as the projected JSON, and the measurement
 decodes the compact form back to the fixture records to confirm it.
 
-With the field set held constant at the scenario's four fields, L3 to L4:
+The field set stays at the scenario's four fields. Only the serialization
+changes, from projected minified JSON to a header plus value rows, which is the
+step from L3 to L4:
 
 | Scale | Minified projected JSON | Header plus value rows | Reduction |
 | ---: | ---: | ---: | ---: |
@@ -172,37 +177,43 @@ With the field set held constant at the scenario's four fields, L3 to L4:
 | 100 | 2,089 | 1,154 | 45% |
 | 500 | 10,434 | 5,748 | 45% |
 
-This is the row the previous version of this article could not report. Its
-fixture had no projected compact payload, so it compared formats at one field set
-and projections at one format and refused to combine them. This ladder holds the
-field set fixed across L3 and L4, so the comparison is a format change and
-nothing else. The exact values run from 39.25 to 44.91 percent.
+This is the comparison the previous version of this article could not make. Its
+fixture had no projected compact payload, so it compared serializations at one
+field set and projections at one serialization, and refused to combine them.
+This ladder holds the field set fixed across L3 and L4, so the only thing that
+changes between the two rungs is the serialization. The exact values run from
+39.25 to 44.91 percent.
 
 Representation has a limit that selection does not: the saving scales with the
 number of field names and the punctuation around them, not with the amount of
 data behind them. Wide records with short values gain the most. A response
 dominated by long free text gains the least, because the text is the payload
 either way. The ladder shows that directly: minifying the full record, which
-still carries the descriptions, is worth 28 to 29 percent, while minifying the
-projected record, where the long field is already gone, is worth 42 to 43
-percent.
+still carries the descriptions, removes 28 to 29 percent of its tokens, while
+minifying the projected record, where the long field is already gone, removes 42
+to 43 percent.
 
-Taking the whole stack together, L0 to L4 removes 87 to 88 percent of the tokens.
-At 100 rows: 9,836 down to 1,154.
+Taking the whole stack together, from pretty full JSON down to the compact view
+of four fields, L0 to L4, removes 87 to 88 percent of the tokens. At 100 rows, a
+9,836-token response becomes 1,154 tokens.
 
 ## What each move costs once
 
-A per-response saving is not a session saving until it has paid off whatever the
-agent had to read to make that particular move. The one-time cost of a transition
-is what the destination needs and the source did not. An artifact both rungs need
-is sunk on both sides and cancels.
+A smaller response saves tokens on every query, but the session as a whole comes
+out ahead only once those savings have paid back the input tokens the agent
+spent on the text it read to make that particular move up the ladder. The
+one-time cost of a transition is easy to state: the transition costs whatever
+the agent has to read for the destination rung and did not read for the source
+rung. Text the agent reads for both rungs sits on both sides of the transition
+and does not enter that cost.
 
-Every rung of this ladder is output from the same query layer. An agent that has
-read the schema response once pays nothing extra to write a projected query
-instead of a full one, and nothing extra to ask for the compact format instead of
-JSON. Measured session constants: the schema response for this scenario is 535
-tokens, the one for the shipped example command-line tool is 1,154, and the alias
-legend is 21.
+Every rung of this ladder is output from the same query layer, so the agent
+reads the schema response on both sides of every transition. Having read it
+once, the agent pays nothing extra to write a projected query instead of a full
+one, and nothing extra to ask for the compact format instead of JSON. Three
+texts the agent reads once per session were measured: the schema response for
+this scenario is 535 tokens, the one for the shipped example command-line tool
+is 1,154, and the alias legend is 21.
 
 | Move | Charged | Sunk on both sides | One-time | Break-even |
 | --- | --- | --- | ---: | ---: |
@@ -210,48 +221,56 @@ legend is 21.
 | compact, L3 to L4 | nothing | schema response | 0 | 1 query |
 | aliases, L4 to L5 | alias legend | schema response | 21 | 11 queries |
 
-Only the alias row has a real incremental cost. The other two are free choices
-inside a session that already uses the query layer.
+Only the move to aliases adds anything the agent has to read: the alias legend.
+Projection and the compact view add nothing new to read, so inside a session
+that already uses the query layer they are free and pay off from the first
+query.
 
-An earlier version of this article charged the whole schema roundtrip against the
-projection and compact rows, which produced break-evens of three and thirteen
-queries and a negative net for compact at five rows. Those figures priced an
-introspection the agent had already paid for on the other side of the same
-transition, and they are withdrawn.
+An earlier version of this article charged the whole schema response, 535
+tokens, against the projection and compact rows, as if a session that sends full
+queries never read it. At five rows projection saves 239 tokens per response and
+the compact view another 42, so that accounting produced break-evens of three
+and thirteen queries and a negative net for compact in any session shorter than
+thirteen queries. Those figures charged each of those transitions for a response
+the agent reads on both sides of it, and they are withdrawn.
 
 There is a framing this ladder cannot support, and it is worth naming because it
-is the one everybody reaches for. There is no rung here that skips the query
-layer: L1 is that layer's own output, not a REST response. So this measurement
-cannot price adoption of a query layer at all. Whether one schema roundtrip is
-worth paying against a plain client that needs no contract is a different
-comparison against a baseline nothing here measures. What survives is narrower
-and still useful: inside a session that already uses the query layer, projection
-and compact output cost nothing extra to choose. And the schema response is paid
-only if the agent introspects at all; documenting the grammar in a skill file
-moves that cost rather than deleting it.
+is the one everybody reaches for: whether to adopt a query layer at all. No rung
+here skips the query layer. Even the full record, L1, is that layer's own
+output, not a REST response. So this measurement cannot say whether one schema
+response is worth paying against a plain client that needs no contract; that
+comparison has a different baseline, and nothing here measures it. What the
+ladder does show is narrower and still useful: an agent already working through
+the query layer pays nothing extra to choose projection or the compact view. And
+the agent pays for the schema response only if it introspects at all;
+documenting the grammar in a skill file moves that cost into the skill file
+rather than deleting it.
 
 ## Layer three: the same two decisions over MCP
 
-Neither layer is a property of a private transport. A tool exposed over the
-[Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
+Neither layer is tied to any one transport. A tool exposed over the [Model
+Context
+Protocol](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
 takes the same selection argument and returns the same representation, because
-`fields` is an ordinary tool argument in the input schema. Projection is a server
-design choice, not a protocol capability, and nothing here says MCP is unable to
-project or to emit compact output.
+`fields` is an ordinary tool argument in the input schema. Projection is a
+server design choice, not a protocol capability, and nothing in this measurement
+says MCP is unable to project or to emit compact output.
 
-One bound governs everything in this section. The contracts compared here are
-constructed from the real schema output rather than captured from a running
-server. No host was started, no SDK was executed, no transcript was recorded. The
-results carry that as an explicit evidence class. The protocol revision is probed
-rather than asserted: on 24 September 2026 the specification's `latest` path
-redirected to revision `2026-07-28`, with a control revision that cannot exist
-returning 404, so a site outage could not be read as a withdrawn revision.
+One bound governs everything in this section. The tool contracts compared here
+were built from the real schema response rather than captured from a running
+server: no host was started, no SDK was executed, no transcript was recorded.
+The recorded results label them as a synthetic contract, not a host measurement.
+The protocol revision was probed rather than assumed: on 24 September 2026 the
+specification's `latest` path redirected to revision `2026-07-28`, with a
+control revision that cannot exist returning 404, so a site outage could not be
+read as a withdrawn revision.
 
-The session-constant comparison, what the agent reads before any call, has no
-profile-independent answer, so both profiles are published. The minimal profile
-carries only what the tool interface requires plus what the schema response
-already publishes. The structured profile adds the output schema that the current
-revision's structured-content surface expects, derived from the same field list.
+How much the agent reads before its first call depends on how fully the server
+describes its tools, so both profiles are published. The minimal profile carries
+only the fields the tool interface requires plus what the schema response
+already publishes. The structured profile adds the output schema that the
+current revision expects from a server returning structured content, derived
+from the same field list.
 
 | Contract | Tools | Profile | MCP tool list | Schema response | Difference |
 | --- | ---: | --- | ---: | ---: | ---: |
@@ -260,23 +279,25 @@ revision's structured-content surface expects, derived from the same field list.
 | example CLI | 9 | minimal | 1,490 | 1,154 | +336 |
 | example CLI | 9 | structured | 1,774 | 1,154 | +620 |
 
-The direction of this comparison is not stable. For the scenario contract it
-flips between profiles, so neither side wins on tool-definition cost, and any
-claim in either direction has to name its profile. What is ruled out on every
-profile measured here is the folk figure of two to three thousand tokens of dead
-weight per session for a tool surface of this size: the largest figure measured
-anywhere in this slice is 1,774.
+This comparison has no stable winner. For the scenario contract the sign changes
+with the profile: the minimal tool list is 64 tokens shorter than the schema
+response, and the structured one is 141 tokens longer. So neither side wins on
+tool-definition cost, and any claim in either direction has to name its profile.
+What is ruled out on every profile measured here is the folk figure of two to
+three thousand tokens of dead weight per session for a tool surface of this
+size: the largest figure measured anywhere in this slice is 1,774.
 
-The real asymmetry is when the cost is paid, not how large it is. A host injects
-the tool list unconditionally at session start; the schema response is paid only
-if the agent asks for it. That is a difference in host behavior, and this
-measurement does not quantify it. How a particular host caches tool definitions,
-where it places them, and what it charges for them is not measured here either.
+The real asymmetry is when the cost is paid, not how large it is. An MCP host
+injects the tool list at the start of every session whether the agent asked or
+not; the agent pays for the schema response only when it asks for it. That is a
+difference in host behavior, and this measurement does not quantify it: how a
+particular host caches tool definitions, where it places them, and what it
+charges for them is not measured here.
 
-There is one argument for compact output that exists only inside MCP. A tool
-result embeds the payload as a JSON string, so every quote character in the
-payload is escaped and charged a second time. Measured against the equivalent
-call through the query layer, per payload format:
+One argument for compact output exists only inside MCP. The server returns a
+tool result as a string inside JSON, so every quote character in the payload
+itself is escaped and charged a second time. Below is the MCP overhead over the
+same response returned by the query layer directly, per payload format:
 
 | Payload | Quotes at 5 rows | Quotes at 500 rows | Overhead at 5 rows | at 500 rows |
 | --- | ---: | ---: | ---: | ---: |
@@ -284,11 +305,12 @@ call through the query layer, per payload format:
 | L3, minified projected JSON | 80 | 8,000 | +59 | +1,049 |
 | L1, full minified JSON | 160 | 16,000 | +69 | +2,049 |
 
-The quote-free compact payload pays exactly 51 tokens at every scale: that is the
-bare envelope. Everything above it tracks the quote count, not the payload size.
-The 500-row compact payload is fifty-three times the size of the 5-row JSON
-payload and pays less framing excess. A JSON payload pays a surcharge inside MCP
-that it does not pay when a command-line tool writes it to standard output.
+The compact payload has no quotes, so its overhead is exactly 51 tokens at every
+scale: that is the cost of the result envelope itself. Everything above that
+grows with the quote count, not with the payload size: the 500-row compact
+payload is fifty-three times the size of the 5-row JSON payload and pays less
+overhead. In other words, JSON inside MCP pays for escaping that it does not pay
+when a command-line tool simply writes it to standard output.
 
 ## Layer four: abbreviating the header, and why it stops there
 
@@ -312,34 +334,39 @@ changed.
 | 100 | 1,154 | 1,152 | 2 tokens (0.2%) |
 | 500 | 5,748 | 5,746 | 2 tokens (0.03%) |
 
-Two tokens, once per response, independent of how many rows follow. The reason is
-structural: the previous layer already moved the field names out of the rows, so
-the only text left to abbreviate is a single line, and its percentage collapses as
-the payload grows. An earlier study on the same library measured the same shape on
-a wider header: five tokens for eight columns, also constant.
+Two tokens per response, however many rows follow the header. The reason is
+structural: the previous layer already moved the field names out of the rows and
+into the header, so the only text left to abbreviate is that one line, and its
+share of the response shrinks as the row count grows. An earlier study on the
+same library measured the same shape on a wider header: five tokens for eight
+columns, also constant.
 
-Those two tokens are not free. An agent that meets `s` and `p` in a header has to
-learn what they mean, and the legend that teaches it is 21 tokens. Against that
-legend, aliases break even at the eleventh query and never recover enough to
-matter: ten queries at five rows nets minus one token, and a hundred queries nets
-179, against a payload that is already 5,748 tokens at 500 rows.
+Those two tokens are not free. An agent that meets `s` and `p` in a header has
+to learn what they mean, and the legend that teaches it is 21 tokens. The agent
+reads the legend once per session and saves two tokens on every response, so
+aliases come out ahead only from the eleventh query on, and never by much: ten
+queries at five rows net minus one token, a hundred queries net plus 179, and a
+single 500-row response already costs 5,748 tokens.
 
-The failure modes are worse than the arithmetic. A partly evicted legend leaves a
-header that still parses and now means something else. Two tools can assign the
-same letter to different fields. A schema with `s`, `sc`, `sp`, and `st` in it
-forces a lookup on every read. Each of those turns a two-token saving into a
-correctness question, which is a poor trade at any session length.
+The failure modes are worse than the arithmetic. If the legend is partly evicted
+from the context, the header still parses, but the agent now reads it as
+something else. Two tools can assign the same letter to different fields. A
+schema with `s`, `sc`, `sp`, and `st` in it forces a lookup on every read. Each
+of those turns a two-token saving into a correctness question, which is a poor
+trade at any session length.
 
-So the useful result of this layer is not its balance sheet. It is the boundary it
-marks: once a format names each field once, abbreviating that name is the last
-fraction of a percent of the problem, and the first place where an optimization
-starts costing more in ambiguity than it returns in tokens. We do not ship alias
-support, and this rung has no production implementation.
+So the useful result of this layer is not its balance sheet but the boundary it
+marks: once a format names each field once, the last fraction of a percent of
+the problem is all that remains, and abbreviating the names themselves is the
+first place where an optimization returns fewer tokens than it adds in
+ambiguity. We do not ship alias support, and this rung has no production
+implementation.
 
 ## Where the boundary sits in a real adapter
 
-The layers above describe what the caller sees. They say nothing about what the
-backend did, and that distinction decides where the selection belongs.
+All the layers above describe the response as the caller sees it. They say
+nothing about how much work the backend did, and that is what decides where the
+selection belongs.
 
 When the source API accepts a field selection, the adapter can pass it through,
 and the backend genuinely does less. Our Jira adapter maps the selected fields
@@ -373,22 +400,22 @@ page, err := client.GetPage(pageID, includeBody)
 
 That boolean is the only part of the selection that reaches the API. In
 [`pages.go`](https://github.com/relux-works/skill-confluence-management/blob/10e342b1c60e52233cc4ef662e70e6b6dcc8011b/internal/confluence/pages.go#L19-L45)
-it decides whether the v2 call sends a body format at all, and whether the v1 call
-appends the page body to its otherwise fixed expand list. The rest of the
-projection never leaves the wrapper. The
-[`list` handler](https://github.com/relux-works/skill-confluence-management/blob/10e342b1c60e52233cc4ef662e70e6b6dcc8011b/internal/query/schema.go#L275-L303)
-has no equivalent at all: it fetches the pages the space returns and applies the
-selector afterwards. The agent still receives only the selected fields, and the
-context saving is real. The backend did nearly the same work it would have done
-without the selection.
+it decides whether the v2 call sends the `body-format` parameter at all, and
+whether the v1 call appends the page body to its `expand` list, which otherwise
+never changes. The rest of the projection never leaves the wrapper. The [`list`
+handler](https://github.com/relux-works/skill-confluence-management/blob/10e342b1c60e52233cc4ef662e70e6b6dcc8011b/internal/query/schema.go#L275-L303)
+has no equivalent at all: it fetches every page the space returns and keeps the
+selected fields afterwards. The agent still receives only those fields, and the
+context saving is real. But the backend did nearly the same work it would have
+done without the selection.
 
 That difference is the honest boundary of a wrapper. Field projection at the
-agent boundary always saves agent context. It saves backend work only where the
-adapter pushes the selection into the upstream request. Neither shape is a
-defect, since the Confluence v2 API offers no equivalent field parameter for
-these calls, but they are different claims and must not be merged into
-"projection makes it faster".
-[Named presets](https://github.com/relux-works/skill-confluence-management/blob/10e342b1c60e52233cc4ef662e70e6b6dcc8011b/internal/query/schema.go#L117-L120)
+agent boundary always saves agent context; it saves backend work only where the
+adapter pushes the selection into the request it sends upstream. Neither shape
+is a defect: the Confluence v2 API simply offers no field-selection parameter
+for these calls. But they are two different claims, and they must not be merged
+into "projection makes it faster". [Named
+presets](https://github.com/relux-works/skill-confluence-management/blob/10e342b1c60e52233cc4ef662e70e6b6dcc8011b/internal/query/schema.go#L117-L120)
 make the common selections short without changing that fact.
 
 In [agentquery](https://github.com/relux-works/skill-agent-facing-api), the Go
@@ -404,43 +431,44 @@ this measurement does not observe.
 
 ## What this measurement does not show
 
-One scenario, one field-size distribution, one tokenizer. The projection drops one
-long free-text field and keeps four short ones; a projection that did the reverse
-would save far less, so every percentage above should be read as "in this
-scenario". No REST server, no HTTP transfer, no latency, no backend cost:
+One scenario, one field-size distribution, one tokenizer. The projection drops
+one long free-text field and keeps four short ones; a projection that did the
+reverse would save far less, so every percentage above should be read as "in
+this scenario". No REST server, no HTTP transfer, no latency, no backend cost:
 everything here is a serialized payload's token count. No host was measured, for
-MCP or for the query layer, so host framing, tool-use scaffolding and system-prompt
-text are all uncounted. The MCP contract is constructed from real schema output
-rather than captured from a running server, its minimal profile is a floor no real
-current-revision server would publish, and its structured profile is itself a lower
-bound on a fully populated contract. The revision pin is fresh as of the dated
-probe, not for all time. Filtering is deliberately outside the ladder, because it
-changes the row set and the ladder's premise is that the row set does not change.
-And the aliased rung has no production implementation.
+MCP or for the query layer, so host framing, tool-use scaffolding and
+system-prompt text are all uncounted. The MCP contract is constructed from real
+schema output rather than captured from a running server; its minimal profile is
+a floor, since no real current-revision server would publish a contract that
+short, and its structured profile is itself a lower bound on a fully populated
+contract. The revision pin is fresh as of the dated probe, not for all time.
+Filtering is deliberately outside the ladder, because it changes the row set and
+the ladder's premise is that the row set does not change. And the aliased rung
+has no production implementation.
 
 ## What to build
 
-Put the selection in the source API when you own it. A field argument that
-reaches the origin query is the only version of this optimization that makes the
-backend do less work, and it is also the version that scales with the data rather
-than with the schema. Make the compact representation the default for responses
-an agent reads: at a fixed field set it removes 39 to 45 percent of what the
-projected JSON cost, and inside a session that already uses the query layer it
-costs nothing extra to choose. Offer both over whichever transport your callers
-need, including MCP, since neither layer is a property of the transport.
+Put the selection in the source API when you own it: only a field argument that
+reaches the origin query makes the backend do less work, and only that saving
+scales with the data rather than with the schema. Make the compact
+representation the default for responses an agent reads: at the same field set
+it removes 39 to 45 percent of what the projected JSON cost, and an agent
+already working through the query layer pays nothing extra to choose it. Offer
+both over whichever transport your callers need, including MCP, since neither
+layer is tied to the transport.
 
-Quote every percentage with its denominator. The same projection in this scenario
-is worth 63 percent or 70 percent depending only on whether the baseline was
-already minified, and a figure that travels without its denominator will be read
-against the wrong one.
+Quote every percentage with its denominator. The same projection in this
+scenario removes 70 percent of a minified record or 63 percent of a
+pretty-printed one, and a figure that travels without its denominator will be
+read against the wrong one.
 
 When the API is somebody else's, or when the native selection is still ahead of
 you, a wrapper is the right answer with one honest caveat: it protects the model's
 context and it promises nothing about the load on the origin server. Say which of
 the two you are delivering.
 
-And stop before the header. Two tokens, constant at every scale, against a
-21-token legend an agent has to hold and a class of decoding failures a correct
-format does not have: that is what an optimization looks like when it has run out
-of structure to remove. When the remaining target is a single line, the work left
-to do is somewhere else.
+And stop before the header. Two tokens per response at every scale, against a
+21-token legend the agent has to keep in its context and a class of decoding
+failures a correct format does not have: that is what an optimization looks like
+when it has run out of structure to remove. When the remaining target is a
+single line, the work left to do is somewhere else.
