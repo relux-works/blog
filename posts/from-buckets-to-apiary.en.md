@@ -98,7 +98,7 @@ The answer is to abstract everything that belongs to a vendor behind our own con
 | Plane | Answers | Module | Status |
 | --- | --- | --- | --- |
 | Context | what an agent receives | [Curator](https://github.com/relux-works/curator) | release candidates |
-| Launch | how intent becomes argv and environment | [agents-management](https://github.com/relux-works/skill-agents-management) module; [curator-agent-launcher](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | module in use; launcher untagged |
+| Launch | how intent becomes argv and environment | [agents-management](https://github.com/relux-works/skill-agents-management) module; [curator-agent-launcher](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | module in use; launcher tagged v0.1.0 |
 | Sessions | who keeps a live session: goals in, events out | [agent-session-host](https://github.com/relux-works/agent-session-host/blob/main/spec/session-host.md); tb-sessiond today | draft v0.3; extraction first |
 | Selection | which model a role gets, and whether it is available | [curator-model-router](https://github.com/relux-works/curator-model-router); an availability aggregator in agents-management | drafts |
 | Inference | which local engines are up | [curator-inference-manager](https://github.com/relux-works/curator-inference-manager) | draft |
@@ -106,7 +106,7 @@ The answer is to abstract everything that belongs to a vendor behind our own con
 
 ### 4.1 Context: a Curator profile per agent
 
-Curator resolves a profile (root instructions, skills, MCP servers) into a **managed home**. That is a per-profile configuration directory, like `~/.claude` or `~/.codex`, that holds only that profile's context. An agent launched there sees exactly that context and nothing the machine has globally ([roadmap §8.2](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#82-why-launches-are-built-in-one-place)). Every harness gets its own managed home, Muse included.
+Curator resolves a profile (root instructions, skills, MCP servers) into a **managed home**. That is a per-profile configuration directory, like `~/.claude` or `~/.codex`, that holds only that profile's context. An agent launched there sees exactly that context and nothing the machine has globally ([roadmap §8.2](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#82-why-launches-are-built-in-one-place)). Managed homes exist today for Claude Code, Codex, OpenCode and Pi; Muse has no adapter yet.
 
 Since 25 September every run launches with the Curator profile of its **role**, so a reviewer's skills live only in the reviewer's home and never in a project folder where an orchestrator could pick them up and start acting as a reviewer ([keeper §13.5](https://github.com/relux-works/curator-keeper/blob/main/spec/keeper.md#135-role-profiles-instead-of-project-folders-decided-2026-09-25)). Which profile a role uses is the operator's choice, recorded in the operator's own `~/.curator/models.toml`.
 
@@ -188,7 +188,7 @@ Beekeeping words appear only where people type them: the `keeper` command and it
 
 ### 5.1 Processes as configuration
 
-The answer to a hard-coded process is **process configuration**, drafted in [curator-playbook](https://github.com/relux-works/curator-playbook) and merged as DRAFT v4.4, the freeze candidate. The vision: any process becomes configuration run by agents, with humans and tools owning the steps that need them, whether it is software delivery, a café's purchasing, a patent pipeline or a family calendar.
+The answer to a hard-coded process is **process configuration**, drafted in [curator-playbook](https://github.com/relux-works/curator-playbook) and merged as DRAFT v4.8, the freeze candidate. The vision: any process becomes configuration run by agents, with humans and tools owning the steps that need them, whether it is software delivery, a café's purchasing, a patent pipeline or a family calendar.
 
 **Two files, two jobs** ([§2.1](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md#21-the-projects-files-decided)). `Skillfile.json` says what is installed; Curator reads it. `Playbook.json` says how the project works; the board reads it, and it carries role aliases, entity types, workflows and policy. They meet only through skill names. The format is JSON with a published schema and an optional `ui` block the kernel ignores, so a visual constructor can later draw and edit the process.
 
@@ -341,7 +341,7 @@ As of 28 September 2026, the specifications are merged on `main` as drafts, so e
 | Module | Status |
 | --- | --- |
 | [waggle](https://github.com/relux-works/waggle/blob/main/spec/waggle.md) | draft v5.2 |
-| [curator-playbook](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md) | draft v4.4, the freeze candidate |
+| [curator-playbook](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md) | draft v4.8, the freeze candidate |
 | [curator-keeper](https://github.com/relux-works/curator-keeper/blob/main/spec/keeper.md) | draft v0.5.1 |
 | [agent-session-host](https://github.com/relux-works/agent-session-host/blob/main/spec/session-host.md) | draft v0.3 |
 | the trust specification | draft, private until review |

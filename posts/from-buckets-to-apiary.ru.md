@@ -98,7 +98,7 @@ draft: true
 | Плоскость | Отвечает на вопрос | Модуль | Состояние |
 | --- | --- | --- | --- |
 | Контекст | что получает агент | [`Curator`](https://github.com/relux-works/curator) | кандидаты в релиз |
-| Запуск | как намерение превращается в `argv` и окружение | модуль [`agents-management`](https://github.com/relux-works/skill-agents-management); [`curator-agent-launcher`](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | модуль работает; у лаунчера пока нет тега |
+| Запуск | как намерение превращается в `argv` и окружение | модуль [`agents-management`](https://github.com/relux-works/skill-agents-management); [`curator-agent-launcher`](https://github.com/relux-works/curator-agent-launcher) (`curator run`); `task-board spawn` | модуль работает; у лаунчера тег v0.1.0 |
 | Сессии | кто держит живую сессию: цели внутрь, события наружу | [`agent-session-host`](https://github.com/relux-works/agent-session-host/blob/main/spec/session-host.md); сегодня `tb-sessiond` | черновик v0.3; сначала вынос |
 | Выбор | какую модель получает роль и доступна ли она | [`curator-model-router`](https://github.com/relux-works/curator-model-router); агрегатор доступности в `agents-management` | черновики |
 | Инференс | какие локальные движки подняты | [`curator-inference-manager`](https://github.com/relux-works/curator-inference-manager) | черновик |
@@ -106,7 +106,7 @@ draft: true
 
 ### 4.1 Контекст: свой профиль `Curator` у каждого агента
 
-`Curator` превращает профиль (корневые инструкции, скиллы, MCP-серверы) в **управляемую домашнюю папку**. Это отдельная папка конфигурации на каждый профиль, вроде `~/.claude` или `~/.codex`, в которой лежит только контекст этого профиля. Агент, запущенный в ней, видит ровно этот контекст и ничего из того, что установлено на машине глобально ([роадмап §8.2](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#82-why-launches-are-built-in-one-place)). Своя управляемая папка есть у каждой среды, включая `Muse`.
+`Curator` превращает профиль (корневые инструкции, скиллы, MCP-серверы) в **управляемую домашнюю папку**. Это отдельная папка конфигурации на каждый профиль, вроде `~/.claude` или `~/.codex`, в которой лежит только контекст этого профиля. Агент, запущенный в ней, видит ровно этот контекст и ничего из того, что установлено на машине глобально ([роадмап §8.2](https://github.com/relux-works/wiki/blob/main/roadmap/ecosystem-roadmap.md#82-why-launches-are-built-in-one-place)). Управляемые папки сегодня есть у `Claude Code`, Codex, OpenCode и `Pi`; у `Muse` своего адаптера пока нет.
 
 С 25 сентября каждый запуск стартует с профилем `Curator` своей **роли**, поэтому скиллы ревьюера живут только в папке ревьюера и никогда не попадают в папку проекта, где их мог бы подхватить оркестратор и начать вести себя как ревьюер ([Кипер §13.5](https://github.com/relux-works/curator-keeper/blob/main/spec/keeper.md#135-role-profiles-instead-of-project-folders-decided-2026-09-25)). Какой профиль у какой роли, выбирает оператор в своём личном файле `~/.curator/models.toml`.
 
@@ -188,7 +188,7 @@ draft: true
 
 ### 5.1 Процесс как конфигурация
 
-Ответ на зашитый в код процесс называется **конфигурацией процесса**. Её черновик лежит в [`curator-playbook`](https://github.com/relux-works/curator-playbook) и влит как черновик v4.4, кандидат на заморозку. Идея такая: любой процесс превращается в конфигурацию, которую ведут агенты, а люди и инструменты берут на себя шаги, где они нужны. Это может быть доставка софта, закупки кафе, патентный конвейер или семейный календарь.
+Ответ на зашитый в код процесс называется **конфигурацией процесса**. Её черновик лежит в [`curator-playbook`](https://github.com/relux-works/curator-playbook) и влит как черновик v4.8, кандидат на заморозку. Идея такая: любой процесс превращается в конфигурацию, которую ведут агенты, а люди и инструменты берут на себя шаги, где они нужны. Это может быть доставка софта, закупки кафе, патентный конвейер или семейный календарь.
 
 **Два файла, две задачи** ([§2.1](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md#21-the-projects-files-decided)). `Skillfile.json` говорит, что установлено, и его читает `Curator`. `Playbook.json` говорит, как работает проект: его читает борда, в нём псевдонимы ролей, типы сущностей, схемы работы и политика. Встречаются они только через имена скиллов. Формат: JSON с опубликованной схемой и необязательный блок `ui`, который ядро игнорирует, чтобы визуальный конструктор потом мог рисовать и править процесс.
 
@@ -341,7 +341,7 @@ draft: true
 | Модуль | Состояние |
 | --- | --- |
 | [`waggle`](https://github.com/relux-works/waggle/blob/main/spec/waggle.md) | черновик v5.2 |
-| [`curator-playbook`](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md) | черновик v4.4, кандидат на заморозку |
+| [`curator-playbook`](https://github.com/relux-works/curator-playbook/blob/main/spec/process-configuration.md) | черновик v4.8, кандидат на заморозку |
 | [`curator-keeper`](https://github.com/relux-works/curator-keeper/blob/main/spec/keeper.md) | черновик v0.5.1 |
 | [`agent-session-host`](https://github.com/relux-works/agent-session-host/blob/main/spec/session-host.md) | черновик v0.3 |
 | спецификация доверия | черновик, закрыт до ревью |
